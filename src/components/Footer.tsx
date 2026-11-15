@@ -3,7 +3,7 @@ import React from 'react';
 export const Footer: React.FC = () => {
   return (
     <footer className="mt-auto w-full border-t border-[#141413] bg-[#F4F3EF]">
-      <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between px-4 sm:px-8">
+      <div className="mx-auto flex h-auto max-w-[1440px] items-center justify-between px-4 py-3 sm:px-8 md:h-14 md:py-0">
         {/* Footer Logo: kyung Wordmark Only */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -28,9 +28,26 @@ export const Footer: React.FC = () => {
             />
           </g>
         </svg>
-        <span className="text-xs font-normal tracking-tight text-[#141413] whitespace-nowrap shrink-0">
-          Seoul, Korea
-        </span>
+        <div className="flex flex-col items-end gap-y-0.5 text-right md:flex-row md:items-center md:gap-x-3 md:gap-y-0">
+          <span className="flex items-center gap-x-2 whitespace-nowrap">
+            <span className="text-xs font-normal tracking-tight text-[#141413] whitespace-nowrap">
+              Seoul, Korea
+            </span>
+            <span className="text-[#6E706E] whitespace-nowrap">·</span>
+            <a
+              href="https://instagram.com/teahousekyung"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[11px] md:text-xs tracking-wide text-[#141413] hover:underline whitespace-nowrap"
+            >
+              @teahousekyung
+            </a>
+          </span>
+          <span className="hidden text-[#6E706E] md:inline whitespace-nowrap">·</span>
+          <span className="whitespace-nowrap font-mono text-[11px] md:text-xs tracking-wide text-[#141413]">
+            © 2026 tea house kyung
+          </span>
+        </div>
       </div>
     </footer>
   );
