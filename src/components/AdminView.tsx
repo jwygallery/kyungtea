@@ -30,6 +30,7 @@ interface AdminViewProps {
   dataset: KyungDataset;
   onUpdateDataset: (next: KyungDataset) => void;
   onResetToDefault: () => void;
+  onRebootApp?: () => void;
 }
 
 const ADMIN_TABS: AdminTab[] = [
@@ -44,6 +45,7 @@ const ADMIN_TABS: AdminTab[] = [
 export const AdminView: React.FC<AdminViewProps> = ({
   dataset,
   onUpdateDataset,
+  onRebootApp,
 }) => {
   // Passcode Authentication State
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
@@ -110,7 +112,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     reader.readAsDataURL(file);
   };
 
-  // Single Unified Save + GitHub Push Handler
+  // Single Unified Save + GitHub Push + Auto Reboot Handler
   const handleSaveAllAndSyncGitHub = async () => {
     setIsSaving(true);
     setStatusNotice('Saving...');
@@ -152,15 +154,35 @@ export const AdminView: React.FC<AdminViewProps> = ({
     onUpdateDataset(nextDataset);
     saveGitHubSyncConfig(ghConfig);
 
-    // 2. Push to GitHub if credentials are provided
+    // 2. Push to GitHub if credentials are provided, then automatically reboot
     if (ghConfig.owner.trim() && ghConfig.repo.trim() && ghConfig.token.trim()) {
+      setStatusNotice('Pushing to GitHub...');
       const res = await pushDatasetToGitHub(ghConfig, nextDataset);
-      setStatusNotice(res.ok ? 'Saved & Pushed to GitHub' : `Saved locally (${res.message})`);
-    } else {
-      setStatusNotice('Saved');
+      if (res.ok) {
+        setStatusNotice('Pushed to GitHub — Rebooting...');
+        setIsSaving(false);
+        setTimeout(() => {
+          if (onRebootApp) {
+            onRebootApp();
+          } else {
+            window.location.reload();
+          }
+        }, 350);
+        return;
+      } else {
+        setStatusNotice(`Saved locally (${res.message})`);
+        setIsSaving(false);
+        return;
+      }
     }
 
+    setStatusNotice('Saved — Rebooting...');
     setIsSaving(false);
+    setTimeout(() => {
+      if (onRebootApp) {
+        onRebootApp();
+      }
+    }, 350);
   };
 
   // Passcode Lock Screen

@@ -103,6 +103,22 @@ export async function pullDatasetFromGitHub(
 
     const res = await fetch(apiUrl, { headers, cache: 'no-store' });
     if (!res.ok) {
+      // Fallback to raw.githubusercontent.com for public repos to avoid API rate limits on boot
+      const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(
+        owner
+      )}/${encodeURIComponent(repo)}/${encodeURIComponent(
+        branch
+      )}/${filePath}?t=${Date.now()}`;
+      const rawRes = await fetch(rawUrl, { cache: 'no-store' });
+      if (rawRes.ok) {
+        const parsed = (await rawRes.json()) as KyungDataset;
+        return {
+          ok: true,
+          data: parsed,
+          message: `PULLED FROM RAW GITHUB (${owner}/${repo}@${branch}:${filePath})`,
+        };
+      }
+
       const errBody = await res.json().catch(() => ({}));
       return {
         ok: false,
@@ -215,10 +231,26 @@ export async function pushDatasetToGitHub(
       }
     }
 
+    // 3. Best-effort automatic trigger for GitHub Pages build & workflow dispatch on push
+    const baseRepoUrl = `https://api.github.com/repos/${encodeURIComponent(
+      owner
+    )}/${encodeURIComponent(repo)}`;
+    await Promise.allSettled([
+      fetch(`${baseRepoUrl}/pages/builds`, {
+        method: 'POST',
+        headers,
+      }),
+      fetch(`${baseRepoUrl}/actions/workflows/deploy.yml/dispatches`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ ref: branch }),
+      }),
+    ]);
+
     return {
       ok: true,
       commitUrl: lastCommitUrl,
-      message: `PUSHED TO GITHUB (${owner}/${repo}@${branch}:${primaryPath}) — 전체 방문자에게 동일하게 반영됩니다.`,
+      message: `PUSHED TO GITHUB (${owner}/${repo}@${branch}:${primaryPath})`,
     };
   } catch (err) {
     return {

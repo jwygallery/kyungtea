@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
         <span className="text-base font-semibold tracking-tight text-[#141413] lowercase whitespace-nowrap shrink-0">
           kyung
         </span>
-        <span className="font-mono text-xs tracking-wider text-[#141413] whitespace-nowrap shrink-0">
+        <span className="text-xs font-normal tracking-tight text-[#141413] whitespace-nowrap shrink-0">
           Seoul, Korea
         </span>
       </div>

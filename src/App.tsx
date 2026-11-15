@@ -51,6 +51,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<MenuTab>('Home');
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [dataset, setDataset] = useState<KyungDataset>(() => loadInitialLocalStorageDataset());
+  const [bootCycle, setBootCycle] = useState<number>(0);
 
   // Persist dataset to localStorage and update React state immediately
   const handleUpdateDataset = (next: KyungDataset) => {
@@ -70,14 +71,22 @@ export default function App() {
     handleUpdateDataset(resetData);
   };
 
-  // Sync with GitHub / public data.json on mount so all visitors see the latest pushed content
+  // Reboot application cleanly to Home and re-sync latest pushed dataset
+  const handleRebootApp = () => {
+    setIsDrawerOpen(false);
+    setActiveTab('Home');
+    setBootCycle((prev) => prev + 1);
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  };
+
+  // Sync with GitHub / public data.json on boot and when returning to the tab
   useEffect(() => {
     let cancelled = false;
 
     async function hydrateFromServerData() {
       const localCurrent = loadInitialLocalStorageDataset();
 
-      // 1. Check if GitHub repo config exists to pull directly from GitHub API
+      // 1. Check if GitHub repo config exists to pull directly from GitHub API / Raw
       const ghConf = loadGitHubSyncConfig();
       if (ghConf.owner && ghConf.repo) {
         const ghRes = await pullDatasetFromGitHub(ghConf);
@@ -115,15 +124,25 @@ export default function App() {
         }
       }
     };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        hydrateFromServerData();
+      }
+    };
+
     window.addEventListener('storage', handleStorageEvent);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       cancelled = true;
       window.removeEventListener('storage', handleStorageEvent);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [bootCycle]);
 
   return (
     <div
+      key={bootCycle}
       className={`flex flex-col bg-[#F4F3EF] text-[#141413] ${
         activeTab === 'Home' ? '' : 'min-h-screen'
       }`}
@@ -154,6 +173,7 @@ export default function App() {
             dataset={dataset}
             onUpdateDataset={handleUpdateDataset}
             onResetToDefault={handleResetToDefault}
+            onRebootApp={handleRebootApp}
           />
         )}
       </main>

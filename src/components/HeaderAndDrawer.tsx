@@ -160,7 +160,7 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
                   onSelectTab('Admin');
                   setIsDrawerOpen(false);
                 }}
-                className="text-base font-semibold tracking-tight text-[#141413] lowercase whitespace-nowrap shrink-0 cursor-pointer"
+                className="text-xs font-normal tracking-tight text-[#141413] lowercase whitespace-nowrap shrink-0 cursor-pointer"
               >
                 admin
               </button>
