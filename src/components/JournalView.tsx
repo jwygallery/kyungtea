@@ -7,6 +7,8 @@ interface JournalViewProps {
   selectedPostId?: string | null;
   onSelectPostId?: (id: string | null) => void;
   onBack?: () => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export const JournalView: React.FC<JournalViewProps> = ({
@@ -14,8 +16,19 @@ export const JournalView: React.FC<JournalViewProps> = ({
   selectedPostId: controlledPostId,
   onSelectPostId,
   onBack,
+  searchQuery: externalQuery,
+  onSearchChange,
 }) => {
   const [internalPostId, setInternalPostId] = useState<string | null>(null);
+  const [internalQuery, setInternalQuery] = useState<string>('');
+  const query = externalQuery !== undefined ? externalQuery : internalQuery;
+  const setQuery = (val: string) => {
+    if (onSearchChange) {
+      onSearchChange(val);
+    } else {
+      setInternalQuery(val);
+    }
+  };
   const selectedPostId = controlledPostId !== undefined ? controlledPostId : internalPostId;
 
   const handleSelectPost = (id: string | null) => {
@@ -114,16 +127,56 @@ export const JournalView: React.FC<JournalViewProps> = ({
     );
   }
 
-  // Feed List View: No photos, no ISSUE 01 box, no READ ISSUE button — only Title and Date below Title
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredJournals = normalizedQuery
+    ? journals.filter((post) => {
+        const blockText = post.blocks
+          .map((b) => `${b.content} ${b.caption || ''}`)
+          .join(' ');
+        const hay = [post.title, post.date, post.issueNo, post.summary, blockText]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return hay.includes(normalizedQuery);
+      })
+    : journals;
+
+  // Feed List View: Top Search Bar + Title and Date below Title
   return (
     <section className="mx-auto w-full max-w-[1440px]">
-      {journals.length === 0 ? (
+      {/* Simple Top Search Bar */}
+      <div className="flex h-12 items-center border-b border-[#141413] bg-[#F4F3EF] px-6 sm:px-10">
+        <div className="flex w-full max-w-xs items-center gap-2.5">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            className="shrink-0 text-[#141413]"
+          >
+            <circle cx="6.8" cy="6.8" r="5.3" stroke="#141413" strokeWidth="1.4" />
+            <line x1="10.8" y1="10.8" x2="15" y2="15" stroke="#141413" strokeWidth="1.4" />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search"
+            aria-label="Search journal"
+            className="w-full bg-transparent text-xs text-[#141413] placeholder-[#6E706E] focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {filteredJournals.length === 0 ? (
         <div className="p-16 text-center text-sm text-[#6E706E]">
-          등록된 저널 게시물이 없습니다.
+          {normalizedQuery ? '검색 결과가 없습니다.' : '등록된 저널 게시물이 없습니다.'}
         </div>
       ) : (
         <div className="divide-y divide-[#141413]">
-          {journals.map((post) => (
+          {filteredJournals.map((post) => (
             <article
               key={post.id}
               onClick={() => handleSelectPost(post.id)}

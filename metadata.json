@@ -1,6 +1,6 @@
 {
   "name": "kyung — Botanical Tea House & Herbarium Archive",
-  "description": "Swiss International Style botanical specimen archive, terroir journal, and B2B portal for Korean modern botanical tea house kyung.",
+  "description": "",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

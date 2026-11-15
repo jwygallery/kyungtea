@@ -8,6 +8,8 @@ interface ArchiveViewProps {
   selectedSpecimenId?: string | null;
   onSelectSpecimenId?: (id: string | null) => void;
   onBack?: () => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export const ArchiveView: React.FC<ArchiveViewProps> = ({
@@ -16,8 +18,19 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
   selectedSpecimenId,
   onSelectSpecimenId,
   onBack,
+  searchQuery: externalQuery,
+  onSearchChange,
 }) => {
   const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
+  const [internalQuery, setInternalQuery] = useState<string>('');
+  const query = externalQuery !== undefined ? externalQuery : internalQuery;
+  const setQuery = (val: string) => {
+    if (onSearchChange) {
+      onSearchChange(val);
+    } else {
+      setInternalQuery(val);
+    }
+  };
   const activeId = selectedSpecimenId !== undefined ? selectedSpecimenId : internalSelectedId;
   const selectedSpecimen = archives.find((a) => a.id === activeId) || null;
 
@@ -154,16 +167,63 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
     );
   }
 
-  // Archive Product List Grid: Left 2 lines (unbolded small Archive No. + Title underneath), Right 60% smaller vertical 3:4 photo
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredArchives = normalizedQuery
+    ? archives.filter((item) => {
+        const hay = [
+          item.archiveNo,
+          item.title,
+          item.nameKo,
+          item.scientificName,
+          item.originCoords,
+          item.altitude,
+          item.processingSpec,
+          item.flavorComponents,
+          item.specimenNotes,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return hay.includes(normalizedQuery);
+      })
+    : archives;
+
+  // Archive Product List Grid: Top Search Bar + Left 2 lines + Right 60% smaller vertical 3:4 photo
   return (
     <section className="mx-auto w-full max-w-[1440px]">
-      {archives.length === 0 ? (
+      {/* Simple Top Search Bar */}
+      <div className="flex h-12 items-center border-b border-[#141413] bg-[#F4F3EF] px-6 sm:px-10">
+        <div className="flex w-full max-w-xs items-center gap-2.5">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            className="shrink-0 text-[#141413]"
+          >
+            <circle cx="6.8" cy="6.8" r="5.3" stroke="#141413" strokeWidth="1.4" />
+            <line x1="10.8" y1="10.8" x2="15" y2="15" stroke="#141413" strokeWidth="1.4" />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search"
+            aria-label="Search archive"
+            className="w-full bg-transparent text-xs text-[#141413] placeholder-[#6E706E] focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {filteredArchives.length === 0 ? (
         <div className="p-16 text-center text-sm text-[#6E706E]">
-          등록된 원물 아카이브가 없습니다.
+          {normalizedQuery ? '검색 결과가 없습니다.' : '등록된 원물 아카이브가 없습니다.'}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2">
-          {archives.map((item, idx) => {
+          {filteredArchives.map((item, idx) => {
             const isRightCol = idx % 2 === 1;
             const displayTitle = item.title || item.nameKo;
 

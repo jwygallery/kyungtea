@@ -254,6 +254,9 @@ export default function App() {
         onSelectTab={(tab) => navigateTo(tab, null)}
         isDrawerOpen={isDrawerOpen}
         setIsDrawerOpen={setIsDrawerOpen}
+        archives={dataset.archives}
+        journals={dataset.journals}
+        onNavigateItem={(tab, itemId) => navigateTo(tab, itemId)}
       />
 
       <main className={activeTab === 'Home' ? '' : 'flex-1'}>
