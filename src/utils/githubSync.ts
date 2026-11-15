@@ -231,10 +231,88 @@ export async function pushDatasetToGitHub(
       }
     }
 
-    // 3. Best-effort automatic trigger for GitHub Pages build & workflow dispatch on push
+    // 3. Best-effort ensure .github/workflows/deploy.yml has no lockfile cache requirement & trigger Pages build
     const baseRepoUrl = `https://api.github.com/repos/${encodeURIComponent(
       owner
     )}/${encodeURIComponent(repo)}`;
+    const workflowPath = '.github/workflows/deploy.yml';
+    const workflowYaml = `name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: \${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build application
+        run: npm run build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+`;
+
+    try {
+      const wfRes = await fetch(
+        `${baseRepoUrl}/contents/${workflowPath}?ref=${encodeURIComponent(branch)}&t=${Date.now()}`,
+        { headers, cache: 'no-store' }
+      );
+      if (wfRes.ok) {
+        const wfJson = await wfRes.json();
+        const existingContent = wfJson.content ? decodeBase64ToUtf8(wfJson.content) : '';
+        if (existingContent.includes("cache: 'npm'") || existingContent.includes('cache: "npm"')) {
+          await fetch(`${baseRepoUrl}/contents/${workflowPath}`, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify({
+              message: 'fix(ci): remove npm cache lockfile requirement in deploy workflow',
+              content: encodeUtf8ToBase64(workflowYaml),
+              branch,
+              sha: wfJson.sha,
+            }),
+          });
+        }
+      }
+    } catch {
+      // Ignore if token does not have workflow scope
+    }
+
     await Promise.allSettled([
       fetch(`${baseRepoUrl}/pages/builds`, {
         method: 'POST',
