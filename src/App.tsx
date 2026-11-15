@@ -46,12 +46,115 @@ function loadInitialLocalStorageDataset(): KyungDataset {
   }
 }
 
+interface RouteState {
+  tab: MenuTab;
+  itemId: string | null;
+}
+
+function parseRouteFromHash(hash: string): RouteState {
+  const clean = hash.replace(/^#\/?/, '').trim();
+  if (!clean) return { tab: 'Home', itemId: null };
+
+  const [seg0, ...rest] = clean.split('/');
+  const subId = rest.length > 0 ? decodeURIComponent(rest.join('/')) : null;
+  const key = seg0.toLowerCase();
+
+  switch (key) {
+    case 'about':
+      return { tab: 'About', itemId: null };
+    case 'archive':
+      return { tab: 'Archive', itemId: subId || null };
+    case 'journal':
+      return { tab: 'Journal', itemId: subId || null };
+    case 'contact':
+      return { tab: 'Contact', itemId: null };
+    case 'admin':
+      return { tab: 'Admin', itemId: null };
+    case 'home':
+    default:
+      return { tab: 'Home', itemId: null };
+  }
+}
+
+function buildHashFromRoute(tab: MenuTab, itemId?: string | null): string {
+  switch (tab) {
+    case 'About':
+      return '#/about';
+    case 'Archive':
+      return itemId ? `#/archive/${encodeURIComponent(itemId)}` : '#/archive';
+    case 'Journal':
+      return itemId ? `#/journal/${encodeURIComponent(itemId)}` : '#/journal';
+    case 'Contact':
+      return '#/contact';
+    case 'Admin':
+      return '#/admin';
+    case 'Home':
+    default:
+      return '#/';
+  }
+}
+
 export default function App() {
-  // Default landing screen is Home (horizontal 4:3 photo slideshow)
-  const [activeTab, setActiveTab] = useState<MenuTab>('Home');
+  const initialRoute =
+    typeof window !== 'undefined'
+      ? parseRouteFromHash(window.location.hash)
+      : { tab: 'Home' as MenuTab, itemId: null };
+
+  const [activeTab, setActiveTab] = useState<MenuTab>(initialRoute.tab);
+  const [activeItemId, setActiveItemId] = useState<string | null>(initialRoute.itemId);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [dataset, setDataset] = useState<KyungDataset>(() => loadInitialLocalStorageDataset());
   const [bootCycle, setBootCycle] = useState<number>(0);
+
+  // Navigate to a route and push an entry to browser history so Back returns to the previous page
+  const navigateTo = (tab: MenuTab, itemId: string | null = null) => {
+    setActiveTab(tab);
+    setActiveItemId(itemId);
+    if (typeof window !== 'undefined') {
+      const nextHash = buildHashFromRoute(tab, itemId);
+      if (window.location.hash !== nextHash) {
+        window.history.pushState({ tab, itemId, inAppNav: true }, '', nextHash);
+      }
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    }
+  };
+
+  // Go back to previous route in history (or fallback list view if deep-linked)
+  const handleBackNavigation = (fallbackTab: MenuTab) => {
+    if (typeof window !== 'undefined' && window.history.state?.inAppNav) {
+      window.history.back();
+    } else {
+      navigateTo(fallbackTab, null);
+    }
+  };
+
+  // Sync browser Back/Forward buttons (popstate / hashchange) with React route state
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (!window.location.hash) {
+      window.history.replaceState(
+        { tab: initialRoute.tab, itemId: initialRoute.itemId, inAppNav: false },
+        '',
+        buildHashFromRoute(initialRoute.tab, initialRoute.itemId)
+      );
+    }
+
+    const syncRouteFromLocation = () => {
+      const parsed = parseRouteFromHash(window.location.hash);
+      setActiveTab(parsed.tab);
+      setActiveItemId(parsed.itemId);
+      setIsDrawerOpen(false);
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    };
+
+    window.addEventListener('popstate', syncRouteFromLocation);
+    window.addEventListener('hashchange', syncRouteFromLocation);
+    return () => {
+      window.removeEventListener('popstate', syncRouteFromLocation);
+      window.removeEventListener('hashchange', syncRouteFromLocation);
+    };
+  }, []);
 
   // Persist dataset to localStorage and update React state immediately
   const handleUpdateDataset = (next: KyungDataset) => {
@@ -74,9 +177,8 @@ export default function App() {
   // Reboot application cleanly to Home and re-sync latest pushed dataset
   const handleRebootApp = () => {
     setIsDrawerOpen(false);
-    setActiveTab('Home');
+    navigateTo('Home', null);
     setBootCycle((prev) => prev + 1);
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   };
 
   // Sync with GitHub / public data.json on boot and when returning to the tab
@@ -149,10 +251,7 @@ export default function App() {
     >
       <HeaderAndDrawer
         activeTab={activeTab}
-        onSelectTab={(tab) => {
-          setActiveTab(tab);
-          window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-        }}
+        onSelectTab={(tab) => navigateTo(tab, null)}
         isDrawerOpen={isDrawerOpen}
         setIsDrawerOpen={setIsDrawerOpen}
       />
@@ -162,11 +261,21 @@ export default function App() {
         {activeTab === 'Archive' && (
           <ArchiveView
             archives={dataset.archives}
-            onNavigateTab={(tab) => setActiveTab(tab)}
+            selectedSpecimenId={activeItemId}
+            onSelectSpecimenId={(id) => navigateTo('Archive', id)}
+            onBack={() => handleBackNavigation('Archive')}
+            onNavigateTab={(tab) => navigateTo(tab, null)}
           />
         )}
         {activeTab === 'About' && <AboutView about={dataset.about} />}
-        {activeTab === 'Journal' && <JournalView journals={dataset.journals} />}
+        {activeTab === 'Journal' && (
+          <JournalView
+            journals={dataset.journals}
+            selectedPostId={activeItemId}
+            onSelectPostId={(id) => navigateTo('Journal', id)}
+            onBack={() => handleBackNavigation('Journal')}
+          />
+        )}
         {activeTab === 'Contact' && <ContactView contact={dataset.contact} />}
         {activeTab === 'Admin' && (
           <AdminView

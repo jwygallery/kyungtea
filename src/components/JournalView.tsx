@@ -4,10 +4,35 @@ import { HerbariumImage } from './HerbariumImage';
 
 interface JournalViewProps {
   journals: JournalPost[];
+  selectedPostId?: string | null;
+  onSelectPostId?: (id: string | null) => void;
+  onBack?: () => void;
 }
 
-export const JournalView: React.FC<JournalViewProps> = ({ journals }) => {
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+export const JournalView: React.FC<JournalViewProps> = ({
+  journals,
+  selectedPostId: controlledPostId,
+  onSelectPostId,
+  onBack,
+}) => {
+  const [internalPostId, setInternalPostId] = useState<string | null>(null);
+  const selectedPostId = controlledPostId !== undefined ? controlledPostId : internalPostId;
+
+  const handleSelectPost = (id: string | null) => {
+    if (onSelectPostId) {
+      onSelectPostId(id);
+    } else {
+      setInternalPostId(id);
+    }
+  };
+
+  const handleBackClick = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      handleSelectPost(null);
+    }
+  };
 
   const activePost = journals.find((j) => j.id === selectedPostId) || null;
 
@@ -19,7 +44,7 @@ export const JournalView: React.FC<JournalViewProps> = ({ journals }) => {
         <div className="flex items-center justify-start pb-6">
           <button
             type="button"
-            onClick={() => setSelectedPostId(null)}
+            onClick={handleBackClick}
             aria-label="Back to journal list"
             className="flex h-9 w-9 items-center justify-center text-[#141413] transition-opacity duration-150 hover:opacity-60 cursor-pointer"
           >
@@ -101,14 +126,14 @@ export const JournalView: React.FC<JournalViewProps> = ({ journals }) => {
           {journals.map((post) => (
             <article
               key={post.id}
-              onClick={() => setSelectedPostId(post.id)}
+              onClick={() => handleSelectPost(post.id)}
               role="button"
               tabIndex={0}
               aria-label={post.title}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  setSelectedPostId(post.id);
+                  handleSelectPost(post.id);
                 }
               }}
               className="group border-b border-[#141413] bg-[#F4F3EF] px-6 py-8 transition-colors duration-150 hover:bg-[#EAE8E1]/60 sm:px-10 cursor-pointer"

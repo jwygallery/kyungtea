@@ -270,7 +270,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Build application
         run: npm run build
@@ -296,12 +296,16 @@ jobs:
       if (wfRes.ok) {
         const wfJson = await wfRes.json();
         const existingContent = wfJson.content ? decodeBase64ToUtf8(wfJson.content) : '';
-        if (existingContent.includes("cache: 'npm'") || existingContent.includes('cache: "npm"')) {
+        if (
+          existingContent.includes("cache: 'npm'") ||
+          existingContent.includes('cache: "npm"') ||
+          !existingContent.includes('--legacy-peer-deps')
+        ) {
           await fetch(`${baseRepoUrl}/contents/${workflowPath}`, {
             method: 'PUT',
             headers,
             body: JSON.stringify({
-              message: 'fix(ci): remove npm cache lockfile requirement in deploy workflow',
+              message: 'fix(ci): use --legacy-peer-deps in GitHub Pages deploy workflow',
               content: encodeUtf8ToBase64(workflowYaml),
               branch,
               sha: wfJson.sha,

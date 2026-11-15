@@ -5,10 +5,38 @@ import { HerbariumImage } from './HerbariumImage';
 interface ArchiveViewProps {
   archives: ArchiveSpecimen[];
   onNavigateTab: (tab: MenuTab) => void;
+  selectedSpecimenId?: string | null;
+  onSelectSpecimenId?: (id: string | null) => void;
+  onBack?: () => void;
 }
 
-export const ArchiveView: React.FC<ArchiveViewProps> = ({ archives, onNavigateTab }) => {
-  const [selectedSpecimen, setSelectedSpecimen] = useState<ArchiveSpecimen | null>(null);
+export const ArchiveView: React.FC<ArchiveViewProps> = ({
+  archives,
+  onNavigateTab,
+  selectedSpecimenId,
+  onSelectSpecimenId,
+  onBack,
+}) => {
+  const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
+  const activeId = selectedSpecimenId !== undefined ? selectedSpecimenId : internalSelectedId;
+  const selectedSpecimen = archives.find((a) => a.id === activeId) || null;
+
+  const handleSelectSpecimen = (item: ArchiveSpecimen | null) => {
+    const nextId = item ? item.id : null;
+    if (onSelectSpecimenId) {
+      onSelectSpecimenId(nextId);
+    } else {
+      setInternalSelectedId(nextId);
+    }
+  };
+
+  const handleBackClick = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      handleSelectSpecimen(null);
+    }
+  };
 
   // Product Detail View when an Archive item is clicked
   if (selectedSpecimen) {
@@ -20,7 +48,7 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({ archives, onNavigateTa
         <div className="flex items-center justify-start pb-8">
           <button
             type="button"
-            onClick={() => setSelectedSpecimen(null)}
+            onClick={handleBackClick}
             aria-label="Back to archive list"
             className="flex h-9 w-9 items-center justify-center text-[#141413] transition-opacity duration-150 hover:opacity-60 cursor-pointer"
           >
@@ -113,7 +141,6 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({ archives, onNavigateTa
               <button
                 type="button"
                 onClick={() => {
-                  setSelectedSpecimen(null);
                   onNavigateTab('Contact');
                 }}
                 className="border border-[#141413] bg-[#141413] px-6 py-2.5 text-xs font-medium text-[#F4F3EF] transition-opacity hover:opacity-85 cursor-pointer"
@@ -143,14 +170,14 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({ archives, onNavigateTa
             return (
               <article
                 key={item.id}
-                onClick={() => setSelectedSpecimen(item)}
+                onClick={() => handleSelectSpecimen(item)}
                 role="button"
                 tabIndex={0}
                 aria-label={`${item.archiveNo} ${displayTitle}`}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setSelectedSpecimen(item);
+                    handleSelectSpecimen(item);
                   }
                 }}
                 className={`group flex items-center justify-between gap-6 border-b border-[#141413] bg-[#F4F3EF] px-6 py-6 transition-colors duration-150 hover:bg-[#EAE8E1]/60 sm:px-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#141413] ${
