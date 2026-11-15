@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-14T00:00:00.000Z",
+  "updatedAt": "2026-11-15T02:20:02.664Z",
   "homeSlides": [
     {
       "id": "slide-1",
@@ -16,7 +16,7 @@
     }
   ],
   "about": {
-    "title": "달이지 않고 10~30초 단시간에 우려내는 한국 토종 임산물 보타니컬 아카이브",
+    "title": "한국 토종 임산물 티",
     "subtitle": "HERBARIUM ARCHIVE & RAPID INFUSION PROTOCOL",
     "updatedDate": "2026. 11",
     "blocks": [
@@ -24,18 +24,12 @@
         "id": "about-blk-1",
         "type": "image",
         "content": "./images/about_botanical_herbarium_1794702912883.jpg",
-        "caption": "FIG 01. 서울 보타니컬 표본실 작업대 — 채집된 한국 토종 상엽(Morus alba)의 엽맥과 조직 검수"
+        "caption": "FIG 01. 서울 표본실-채집된 한국 토종 상엽(Morus alba)의 엽맥과 조직 검수"
       },
       {
         "id": "about-blk-2",
         "type": "text",
         "content": "오랜 시간 한국의 산야초와 임산물은 약탕기 속에서 수 시간 동안 무겁게 달여 마시는 ‘탕약(湯藥)’의 영역에 머물러 있었습니다. 그러나 긴 시간 끓여내는 방식은 식물이 지닌 가장 섬세한 휘발성 방향 화합물(Volatile Aromatic Compounds)을 공기 중으로 날려버리고, 탄닌과 섬유질의 과도한 용출로 인해 떫고 탁한 뒷맛만을 남깁니다.\n\n모던 보타니컬 티 하우스 ‘kyung(경)’은 한국 토종 임산물을 대하는 이 오래된 관습을 해체합니다. 우리는 산림에서 채집한 잎과 줄기, 뿌리와 수피를 식물 표본실(Herbarium)의 엄밀한 기준으로 분류하고, 정밀한 열처리(살청·배전)와 균일한 커팅 규격을 통해 단 10초에서 30초 사이의 짧은 침출만으로도 가장 투명하고 입체적인 향미를 추출하는 조제 프로토콜을 설계합니다."
-      },
-      {
-        "id": "about-blk-3",
-        "type": "image",
-        "content": "./images/about_infusion_vessel_1794702914601.jpg",
-        "caption": "FIG 02. 95°C / 20초 1차 침출액 — 달이지 않고 단시간에 추출하여 맑은 황록색 수색과 숭늉의 고소함을 응축한 다관"
       },
       {
         "id": "about-blk-4",
@@ -47,11 +41,11 @@
   "archives": [
     {
       "id": "archive-001",
-      "archiveNo": "Archive No. 001",
+      "archiveNo": "#001",
       "title": "상엽 뽕잎",
       "nameKo": "상엽 뽕잎",
       "scientificName": "Morus alba",
-      "originCoords": "충북 영동 · 36°10'N 127°46'E",
+      "originCoords": "충북 영동",
       "altitude": "ALT 480M",
       "processingSpec": "220°C 살청 · 유념 · 210°C 배전 · 12mm 컷팅",
       "extractionProtocol": "3.5g / 150ml / 95°C / 20s → 15s → 25s → 40s",
@@ -96,15 +90,14 @@
   ],
   "contact": {
     "title": "B2B SAMPLE KIT & ARCHIVE COLLABORATION",
-    "introText": "kyung은 파인다이닝, 스페셜티 커피 바, 부티크 호텔, 건축 및 라이프스타일 공간을 위한 보타니컬 원물 큐레이션과 맞춤 추출 프로토콜(SOP) 및 B2B 샘플 키트를 제공합니다. 샘플 키트 신청 및 협업 문의는 우측 양식을 통해 접수해 주시기 바랍니다.",
-    "email": "archive@kyung-tea.kr",
+    "introText": "kyung은 파인다이닝, 스페셜티 커피 바, 호텔에 원물 큐레이션과 맞춤 추출 프로토콜(SOP) 및 B2B 샘플 키트를 제공합니다. 샘플 키트 신청 및 협업 문의는 우측 양식을 통해 접수해 주시기 바랍니다.",
+    "email": "yoojiwoo@korea.ac.kr",
     "addressHours": "서울특별시 종로구 자하문로 표본실 (Tue–Sat 11:00–19:00 / By Appointment)",
-    "socialHandle": "@kyung.botanical",
+    "socialHandle": "@kyungteahouse",
     "inquiryTypes": [
       "B2B 원물 샘플 키트 신청 (Sample Kit Request)",
       "파인다이닝 · 카페 티 페어링 납품 (Wholesale & Pairing)",
-      "브랜드 · 전시 공간 조제 협업 (Bespoke Archive Collaboration)",
-      "프레스 · 미디어 취재 문의 (Press & Editorial)"
+      "브랜드 · 전시 공간 조제 협업 (Collaboration)"
     ]
   }
 }
