@@ -54,7 +54,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
     return (
       <article className="mx-auto w-full max-w-3xl px-6 py-10 sm:py-14">
         {/* Top-Left Back Button */}
-        <div className="flex items-center justify-start pb-6">
+        <div className="flex items-center justify-start pb-8">
           <button
             type="button"
             onClick={handleBackClick}
@@ -145,7 +145,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
   return (
     <section className="mx-auto w-full max-w-[1440px]">
       {/* Simple Top Search Bar */}
-      <div className="flex h-12 items-center border-b border-[#141413] bg-[#F4F3EF] px-6 sm:px-10">
+      <div className="flex h-12 items-center justify-between gap-4 border-b border-[#141413] bg-[#F4F3EF] px-6 sm:px-10">
         <div className="flex w-full max-w-xs items-center gap-2.5">
           <svg
             width="13"
@@ -167,7 +167,22 @@ export const JournalView: React.FC<JournalViewProps> = ({
             aria-label="Search journal"
             className="w-full bg-transparent text-xs text-[#141413] placeholder-[#6E706E] focus:outline-none"
           />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label="Clear journal search"
+              className="shrink-0 text-xs leading-none text-[#6E706E] hover:text-[#141413] cursor-pointer"
+            >
+              ×
+            </button>
+          )}
         </div>
+        {normalizedQuery && (
+          <span className="shrink-0 text-[11px] text-[#6E706E] tabular-nums">
+            {filteredJournals.length}
+          </span>
+        )}
       </div>
 
       {filteredJournals.length === 0 ? (
@@ -175,7 +190,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
           {normalizedQuery ? '검색 결과가 없습니다.' : '등록된 저널 게시물이 없습니다.'}
         </div>
       ) : (
-        <div className="divide-y divide-[#141413]">
+        <div>
           {filteredJournals.map((post) => (
             <article
               key={post.id}

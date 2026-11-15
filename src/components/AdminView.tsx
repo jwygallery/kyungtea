@@ -54,7 +54,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
   const [passcodeError, setPasscodeError] = useState<boolean>(false);
 
   // Active Admin Tab (ordered cleanly like the menu)
-  const [activeAdminTab, setActiveAdminTab] = useState<AdminTab>('About');
+  const [activeAdminTab, setActiveAdminTab] = useState<AdminTab>('Home');
   const [statusNotice, setStatusNotice] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -235,7 +235,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
     <section className="mx-auto w-full max-w-[1440px]">
       {/* Top Admin Bar: Menu-ordered tabs on left, SINGLE Save button on right */}
       <div className="sticky top-14 z-20 flex flex-wrap items-center justify-between border-b border-[#141413] bg-[#EAE8E1]">
-        <div className="flex flex-wrap divide-x divide-[#141413] border-r border-[#141413]">
+        <div className="flex max-w-full overflow-x-auto divide-x divide-[#141413] border-r border-[#141413]">
           {ADMIN_TABS.map((tab) => {
             const active = activeAdminTab === tab;
             return (

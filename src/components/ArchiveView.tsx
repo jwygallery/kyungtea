@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArchiveSpecimen, MenuTab } from '../types/cms';
 import { getArchiveImageUrls } from '../utils/cmsLogic';
 import { HerbariumImage } from './HerbariumImage';
@@ -24,6 +24,7 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
 }) => {
   const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
   const [internalQuery, setInternalQuery] = useState<string>('');
+  const [activeImageIdx, setActiveImageIdx] = useState<number>(0);
   const query = externalQuery !== undefined ? externalQuery : internalQuery;
   const setQuery = (val: string) => {
     if (onSearchChange) {
@@ -34,6 +35,10 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
   };
   const activeId = selectedSpecimenId !== undefined ? selectedSpecimenId : internalSelectedId;
   const selectedSpecimen = archives.find((a) => a.id === activeId) || null;
+
+  useEffect(() => {
+    setActiveImageIdx(0);
+  }, [activeId]);
 
   const handleSelectSpecimen = (item: ArchiveSpecimen | null) => {
     const nextId = item ? item.id : null;
@@ -56,6 +61,9 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
   if (selectedSpecimen) {
     const displayTitle = selectedSpecimen.title || selectedSpecimen.nameKo;
     const specimenImages = getArchiveImageUrls(selectedSpecimen);
+    const safeIdx =
+      activeImageIdx >= 0 && activeImageIdx < specimenImages.length ? activeImageIdx : 0;
+    const activeImageSrc = specimenImages[safeIdx];
 
     return (
       <article className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
@@ -85,27 +93,48 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
         </div>
 
         {/* 2-Column Botanical Product Layout */}
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:items-start">
-          {/* Left: Vertical 3:4 (세로 4:3) Product Image(s) (60% size) */}
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:items-start md:gap-12">
+          {/* Left: Vertical 3:4 Product Image + Thumbnail Selector */}
           <div className="md:col-span-4">
-            <div className="w-44 sm:w-52 space-y-4">
-              {specimenImages.length > 0 ? (
-                specimenImages.map((imgSrc, imgIdx) => (
-                  <HerbariumImage
-                    key={`${selectedSpecimen.id}-img-${imgIdx}`}
-                    src={imgSrc}
-                    alt={`${displayTitle} ${specimenImages.length > 1 ? `(${imgIdx + 1})` : ''}`.trim()}
-                    aspectClass="aspect-[3/4]"
-                    specimenCode={selectedSpecimen.archiveNo}
-                  />
-                ))
-              ) : (
-                <HerbariumImage
-                  src={undefined}
-                  alt={displayTitle}
-                  aspectClass="aspect-[3/4]"
-                  specimenCode={selectedSpecimen.archiveNo}
-                />
+            <div className="w-full max-w-[260px]">
+              <HerbariumImage
+                src={activeImageSrc}
+                alt={
+                  specimenImages.length > 1
+                    ? `${displayTitle} (${safeIdx + 1})`
+                    : displayTitle
+                }
+                aspectClass="aspect-[3/4]"
+                specimenCode={selectedSpecimen.archiveNo}
+              />
+
+              {specimenImages.length > 1 && (
+                <div className="mt-3 grid grid-cols-4 gap-2">
+                  {specimenImages.map((imgSrc, imgIdx) => {
+                    const isSelected = imgIdx === safeIdx;
+                    return (
+                      <button
+                        key={`${selectedSpecimen.id}-thumb-${imgIdx}`}
+                        type="button"
+                        onClick={() => setActiveImageIdx(imgIdx)}
+                        aria-label={`View image ${imgIdx + 1}`}
+                        aria-pressed={isSelected}
+                        className={`aspect-[3/4] w-full overflow-hidden border bg-[#EAE8E1] transition-opacity cursor-pointer ${
+                          isSelected
+                            ? 'border-[#141413] opacity-100'
+                            : 'border-[#141413]/30 opacity-60 hover:opacity-100'
+                        }`}
+                      >
+                        <img
+                          src={imgSrc}
+                          alt={`${displayTitle} thumbnail ${imgIdx + 1}`}
+                          referrerPolicy="no-referrer"
+                          className="h-full w-full object-cover object-center"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
@@ -116,7 +145,7 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
               <div className="text-xs font-normal tracking-wide text-[#6E706E] tabular-nums">
                 {selectedSpecimen.archiveNo}
               </div>
-              <h1 className="mt-1.5 text-2xl font-medium tracking-tight text-[#141413] sm:text-3xl">
+              <h1 className="mt-1.5 text-2xl font-semibold leading-snug tracking-tight text-[#141413] sm:text-3xl">
                 {displayTitle}
               </h1>
             </header>
@@ -206,7 +235,7 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
   return (
     <section className="mx-auto w-full max-w-[1440px]">
       {/* Simple Top Search Bar */}
-      <div className="flex h-12 items-center border-b border-[#141413] bg-[#F4F3EF] px-6 sm:px-10">
+      <div className="flex h-12 items-center justify-between gap-4 border-b border-[#141413] bg-[#F4F3EF] px-6 sm:px-10">
         <div className="flex w-full max-w-xs items-center gap-2.5">
           <svg
             width="13"
@@ -228,7 +257,22 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
             aria-label="Search archive"
             className="w-full bg-transparent text-xs text-[#141413] placeholder-[#6E706E] focus:outline-none"
           />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label="Clear archive search"
+              className="shrink-0 text-xs leading-none text-[#6E706E] hover:text-[#141413] cursor-pointer"
+            >
+              ×
+            </button>
+          )}
         </div>
+        {normalizedQuery && (
+          <span className="shrink-0 text-[11px] text-[#6E706E] tabular-nums">
+            {filteredArchives.length}
+          </span>
+        )}
       </div>
 
       {filteredArchives.length === 0 ? (
@@ -280,6 +324,12 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
               </article>
             );
           })}
+          {filteredArchives.length % 2 === 1 && (
+            <div
+              aria-hidden="true"
+              className="hidden border-b border-[#141413] bg-[#F4F3EF] md:block"
+            />
+          )}
         </div>
       )}
     </section>

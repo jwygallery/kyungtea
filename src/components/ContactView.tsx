@@ -57,7 +57,7 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
         <div className="flex flex-col justify-between border-b border-[#141413] p-6 sm:p-10 lg:col-span-5 lg:border-b-0 lg:border-r">
           <div>
             <h1
-              className="text-3xl font-semibold leading-tight tracking-tight text-[#141413]"
+              className="text-2xl font-semibold leading-snug tracking-tight text-[#141413] sm:text-3xl"
               style={{ textWrap: 'balance' }}
             >
               {contact.title}
@@ -69,10 +69,10 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
 
           <dl className="mt-10 divide-y divide-[#141413] border-t border-b border-[#141413] text-xs">
             <div className="py-4">
-              <dt className="font-mono text-[11px] tracking-wider text-[#6E706E]">
+              <dt className="text-[11px] font-medium tracking-wide text-[#6E706E]">
                 Email
               </dt>
-              <dd className="mt-1 font-mono text-sm font-medium text-[#141413]">
+              <dd className="mt-1 text-sm font-medium text-[#141413]">
                 <a href={`mailto:${contact.email}`} className="hover:underline">
                   {contact.email}
                 </a>
@@ -80,17 +80,17 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
             </div>
 
             <div className="py-4">
-              <dt className="font-mono text-[11px] tracking-wider text-[#6E706E]">
+              <dt className="text-[11px] font-medium tracking-wide text-[#6E706E]">
                 Address
               </dt>
-              <dd className="mt-1 font-medium text-[#141413]">{contact.addressHours}</dd>
+              <dd className="mt-1 text-sm font-medium text-[#141413]">{contact.addressHours}</dd>
             </div>
 
             <div className="py-4">
-              <dt className="font-mono text-[11px] tracking-wider text-[#6E706E]">
+              <dt className="text-[11px] font-medium tracking-wide text-[#6E706E]">
                 Social
               </dt>
-              <dd className="mt-1 font-mono text-[#141413]">{contact.socialHandle}</dd>
+              <dd className="mt-1 text-sm font-medium text-[#141413]">{contact.socialHandle}</dd>
             </div>
           </dl>
         </div>
@@ -98,15 +98,15 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
         {/* Right Column: Inquiry Form */}
         <div className="p-6 sm:p-10 lg:col-span-7">
           {submittedRecord ? (
-            <div className="mt-6 border border-[#141413] bg-[#EAE8E1] p-6">
-              <div className="font-mono text-xs font-semibold uppercase tracking-wider text-[#141413]">
+            <div className="border border-[#141413] bg-[#EAE8E1] p-6">
+              <div className="text-xs font-semibold uppercase tracking-wider text-[#141413] tabular-nums">
                 DISPATCH CONFIRMED — {submittedRecord.id}
               </div>
               <p className="mt-2 text-sm text-[#141413]">
                 문의가 정상적으로 접수되었습니다. 담당 아키비스트가 확인 후 기재하신 이메일(
-                <span className="font-mono">{submittedRecord.email}</span>)로 표준 스펙 시트 및 샘플 키트 안내를 회신드립니다.
+                <span>{submittedRecord.email}</span>)로 표준 스펙 시트 및 샘플 키트 안내를 회신드립니다.
               </p>
-              <dl className="mt-4 space-y-1 border-t border-[#141413]/20 pt-3 font-mono text-xs text-[#6E706E]">
+              <dl className="mt-4 space-y-1 border-t border-[#141413]/20 pt-3 text-xs text-[#6E706E]">
                 <div>ORGANIZATION: {submittedRecord.organization}</div>
                 <div>CONTACT: {submittedRecord.contactName}</div>
                 <div>CATEGORY: {submittedRecord.inquiryType}</div>
@@ -114,17 +114,17 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
               <button
                 type="button"
                 onClick={() => setSubmittedRecord(null)}
-                className="mt-5 border border-[#141413] bg-[#141413] px-4 py-2 font-mono text-xs text-[#F4F3EF] cursor-pointer"
+                className="mt-5 border border-[#141413] bg-[#141413] px-4 py-2 text-xs font-medium uppercase tracking-wider text-[#F4F3EF] cursor-pointer"
               >
-                [ NEW INQUIRY ]
+                NEW INQUIRY
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5" noValidate>
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               {errorMsg && (
                 <div
                   role="alert"
-                  className="border border-[#141413] bg-[#141413] px-4 py-3 font-mono text-xs text-[#F4F3EF]"
+                  className="border border-[#141413] bg-[#141413] px-4 py-3 text-xs text-[#F4F3EF]"
                 >
                   {errorMsg}
                 </div>
@@ -134,7 +134,7 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
                 <div>
                   <label
                     htmlFor="contact-org"
-                    className="block font-mono text-xs uppercase tracking-wider text-[#141413]"
+                    className="block text-[11px] font-medium uppercase tracking-wider text-[#141413]"
                   >
                     ORGANIZATION / BRAND *
                   </label>
@@ -152,7 +152,7 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
                 <div>
                   <label
                     htmlFor="contact-name"
-                    className="block font-mono text-xs uppercase tracking-wider text-[#141413]"
+                    className="block text-[11px] font-medium uppercase tracking-wider text-[#141413]"
                   >
                     CONTACT PERSON *
                   </label>
@@ -172,9 +172,9 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
                 <div>
                   <label
                     htmlFor="contact-email"
-                    className="block font-mono text-xs uppercase tracking-wider text-[#141413]"
+                    className="block text-[11px] font-medium uppercase tracking-wider text-[#141413]"
                   >
-                    OFFICIAL EMAIL *
+                    EMAIL *
                   </label>
                   <input
                     id="contact-email"
@@ -183,14 +183,14 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@company.com"
-                    className="mt-1.5 w-full border border-[#141413] bg-[#F4F3EF] px-3.5 py-2.5 font-mono text-sm text-[#141413] placeholder:text-[#6E706E] focus:outline-none focus:ring-1 focus:ring-[#141413]"
+                    className="mt-1.5 w-full border border-[#141413] bg-[#F4F3EF] px-3.5 py-2.5 text-sm text-[#141413] placeholder:text-[#6E706E] focus:outline-none focus:ring-1 focus:ring-[#141413]"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="contact-type"
-                    className="block font-mono text-xs uppercase tracking-wider text-[#141413]"
+                    className="block text-[11px] font-medium uppercase tracking-wider text-[#141413]"
                   >
                     INQUIRY TYPE *
                   </label>
@@ -212,9 +212,9 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
               <div>
                 <label
                   htmlFor="contact-message"
-                  className="block font-mono text-xs uppercase tracking-wider text-[#141413]"
+                  className="block text-[11px] font-medium uppercase tracking-wider text-[#141413]"
                 >
-                  PROJECT / SAMPLE KIT DETAILS *
+                  DETAILS *
                 </label>
                 <textarea
                   id="contact-message"
@@ -222,20 +222,19 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
                   required
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="희망하시는 원물 아카이브 넘버(예: ARCHIVE NO. 001), 공간 성격, 예상 월간 소요량 또는 협업 일정을 기재해 주세요."
-                  className="mt-1.5 w-full border border-[#141413] bg-[#F4F3EF] p-3.5 text-sm text-[#141413] placeholder:text-[#6E706E] focus:outline-none focus:ring-1 focus:ring-[#141413]"
+                  className="mt-1.5 w-full border border-[#141413] bg-[#F4F3EF] p-3.5 text-sm text-[#141413] focus:outline-none focus:ring-1 focus:ring-[#141413]"
                 />
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <span className="font-mono text-xs text-[#6E706E]">
+                <span className="text-[11px] font-medium tracking-wider text-[#6E706E] tabular-nums">
                   RESPONSE TIME: 1–2 BUSINESS DAYS
                 </span>
                 <button
                   type="submit"
-                  className="border border-[#141413] bg-[#141413] px-6 py-3 font-mono text-xs font-medium uppercase tracking-wider text-[#F4F3EF] hover:bg-[#141413]/85 whitespace-nowrap shrink-0 cursor-pointer"
+                  className="border border-[#141413] bg-[#141413] px-6 py-3 text-xs font-medium uppercase tracking-wider text-[#F4F3EF] hover:bg-[#141413]/85 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  [ SUBMIT INQUIRY ]
+                  SUBMIT INQUIRY
                 </button>
               </div>
             </form>

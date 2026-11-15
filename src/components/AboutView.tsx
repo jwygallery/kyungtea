@@ -20,7 +20,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ about }) => {
 
       <div className="mt-10 space-y-10">
         {about.blocks.length === 0 ? (
-          <div className="py-12 text-center font-mono text-sm text-[#6E706E]">
+          <div className="py-12 text-center text-sm text-[#6E706E]">
             등록된 아티클 블록이 없습니다.
           </div>
         ) : (

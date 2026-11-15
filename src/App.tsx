@@ -103,6 +103,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<MenuTab>(initialRoute.tab);
   const [activeItemId, setActiveItemId] = useState<string | null>(initialRoute.itemId);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [dataset, setDataset] = useState<KyungDataset>(() => loadInitialLocalStorageDataset());
   const [bootCycle, setBootCycle] = useState<number>(0);
 
@@ -256,6 +257,8 @@ export default function App() {
         setIsDrawerOpen={setIsDrawerOpen}
         archives={dataset.archives}
         journals={dataset.journals}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
         onNavigateItem={(tab, itemId) => navigateTo(tab, itemId)}
       />
 
@@ -268,6 +271,8 @@ export default function App() {
             onSelectSpecimenId={(id) => navigateTo('Archive', id)}
             onBack={() => handleBackNavigation('Archive')}
             onNavigateTab={(tab) => navigateTo(tab, null)}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
         )}
         {activeTab === 'About' && <AboutView about={dataset.about} />}
@@ -277,6 +282,8 @@ export default function App() {
             selectedPostId={activeItemId}
             onSelectPostId={(id) => navigateTo('Journal', id)}
             onBack={() => handleBackNavigation('Journal')}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
         )}
         {activeTab === 'Contact' && <ContactView contact={dataset.contact} />}

@@ -141,7 +141,7 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 330 124"
-                className="h-10 md:h-11 w-auto text-[#141413] overflow-visible select-none"
+                className="h-9 md:h-10 w-auto text-[#141413] overflow-visible select-none"
                 role="img"
                 aria-label="kyung tea house"
               >
@@ -229,6 +229,16 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
                   aria-label="Search archive and journal"
                   className="w-full bg-transparent text-xs text-[#141413] placeholder-[#6E706E] focus:outline-none"
                 />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery('')}
+                    aria-label="Clear search"
+                    className="shrink-0 text-xs leading-none text-[#6E706E] hover:text-[#141413] cursor-pointer"
+                  >
+                    ×
+                  </button>
+                )}
               </form>
 
               <button

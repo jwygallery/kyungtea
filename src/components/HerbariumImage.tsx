@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface HerbariumImageProps {
   src?: string;
@@ -16,6 +16,10 @@ export const HerbariumImage: React.FC<HerbariumImageProps> = ({
   specimenCode = 'HERBARIUM SPECIMEN PLATE',
 }) => {
   const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
 
   const showFallback = !src || hasError;
 
@@ -45,7 +49,7 @@ export const HerbariumImage: React.FC<HerbariumImageProps> = ({
               <path d="M60 62 C78 55, 88 39, 82 24 C70 28, 62 42, 60 62 Z" />
               <line x1="20" y1="100" x2="100" y2="100" strokeDasharray="2 2" />
             </svg>
-            <span className="font-mono text-xs uppercase tracking-widest text-[#6E706E]">
+            <span className="text-[11px] uppercase tracking-widest text-[#6E706E] tabular-nums">
               {specimenCode}
             </span>
             <span className="mt-1 text-sm font-medium text-[#141413]">{alt}</span>

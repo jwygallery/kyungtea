@@ -30,21 +30,21 @@ export const Footer: React.FC = () => {
         </svg>
         <div className="flex flex-col items-end gap-y-0.5 text-right md:flex-row md:items-center md:gap-x-3 md:gap-y-0">
           <span className="flex items-center gap-x-2 whitespace-nowrap">
-            <span className="text-xs font-normal tracking-tight text-[#141413] whitespace-nowrap">
+            <span className="text-[11px] md:text-xs font-normal tracking-wide text-[#141413] whitespace-nowrap">
               Seoul, Korea
             </span>
-            <span className="text-[#6E706E] whitespace-nowrap">·</span>
+            <span className="text-[11px] md:text-xs text-[#6E706E] whitespace-nowrap">·</span>
             <a
               href="https://instagram.com/teahousekyung"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-[11px] md:text-xs tracking-wide text-[#141413] hover:underline whitespace-nowrap"
+              className="text-[11px] md:text-xs font-normal tracking-wide text-[#141413] hover:underline whitespace-nowrap"
             >
               @teahousekyung
             </a>
           </span>
-          <span className="hidden text-[#6E706E] md:inline whitespace-nowrap">·</span>
-          <span className="whitespace-nowrap font-mono text-[11px] md:text-xs tracking-wide text-[#141413]">
+          <span className="hidden text-[11px] md:text-xs text-[#6E706E] md:inline whitespace-nowrap">·</span>
+          <span className="whitespace-nowrap text-[11px] md:text-xs font-normal tracking-wide text-[#141413] tabular-nums">
             © 2024 tea house kyung
           </span>
         </div>
