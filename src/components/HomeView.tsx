@@ -91,7 +91,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ slides }) => {
             advanceSlide();
           }
         }}
-        className="relative w-full aspect-[4/3] overflow-hidden bg-[#EAE8E1] cursor-pointer"
+        className="relative w-full aspect-[4/3] md:aspect-[16/9] md:max-h-[calc(100vh-114px)] overflow-hidden bg-[#EAE8E1] cursor-pointer"
       >
         <div
           onTransitionEnd={handleTransitionEnd}

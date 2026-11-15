@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArchiveSpecimen, MenuTab } from '../types/cms';
+import { getArchiveImageUrls } from '../utils/cmsLogic';
 import { HerbariumImage } from './HerbariumImage';
 
 interface ArchiveViewProps {
@@ -54,6 +55,7 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
   // Product Detail View when an Archive item is clicked
   if (selectedSpecimen) {
     const displayTitle = selectedSpecimen.title || selectedSpecimen.nameKo;
+    const specimenImages = getArchiveImageUrls(selectedSpecimen);
 
     return (
       <article className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
@@ -84,15 +86,27 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
 
         {/* 2-Column Botanical Product Layout */}
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:items-start">
-          {/* Left: Vertical 3:4 (세로 4:3) Product Image (60% size) */}
+          {/* Left: Vertical 3:4 (세로 4:3) Product Image(s) (60% size) */}
           <div className="md:col-span-4">
-            <div className="w-44 sm:w-52">
-              <HerbariumImage
-                src={selectedSpecimen.imageUrl}
-                alt={displayTitle}
-                aspectClass="aspect-[3/4]"
-                specimenCode={selectedSpecimen.archiveNo}
-              />
+            <div className="w-44 sm:w-52 space-y-4">
+              {specimenImages.length > 0 ? (
+                specimenImages.map((imgSrc, imgIdx) => (
+                  <HerbariumImage
+                    key={`${selectedSpecimen.id}-img-${imgIdx}`}
+                    src={imgSrc}
+                    alt={`${displayTitle} ${specimenImages.length > 1 ? `(${imgIdx + 1})` : ''}`.trim()}
+                    aspectClass="aspect-[3/4]"
+                    specimenCode={selectedSpecimen.archiveNo}
+                  />
+                ))
+              ) : (
+                <HerbariumImage
+                  src={undefined}
+                  alt={displayTitle}
+                  aspectClass="aspect-[3/4]"
+                  specimenCode={selectedSpecimen.archiveNo}
+                />
+              )}
             </div>
           </div>
 
@@ -257,7 +271,7 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
                 {/* Right: 60% Smaller Vertical 3:4 (세로 4:3) Product Photo */}
                 <div className="w-14 shrink-0 sm:w-[76px]">
                   <HerbariumImage
-                    src={item.imageUrl}
+                    src={getArchiveImageUrls(item)[0]}
                     alt={displayTitle}
                     aspectClass="aspect-[3/4]"
                     specimenCode={item.archiveNo}

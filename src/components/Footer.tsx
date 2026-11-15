@@ -45,7 +45,7 @@ export const Footer: React.FC = () => {
           </span>
           <span className="hidden text-[#6E706E] md:inline whitespace-nowrap">·</span>
           <span className="whitespace-nowrap font-mono text-[11px] md:text-xs tracking-wide text-[#141413]">
-            © 2026 tea house kyung
+            © 2024 tea house kyung
           </span>
         </div>
       </div>

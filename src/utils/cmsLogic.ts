@@ -213,15 +213,43 @@ export function removeHomeSlide(slides: readonly HomeSlide[], id: string): HomeS
   return slides.filter((s) => s.id !== id);
 }
 
+export function getArchiveImageUrls(
+  specimen: Pick<ArchiveSpecimen, 'imageUrl' | 'imageUrls'>
+): string[] {
+  if (specimen.imageUrls && specimen.imageUrls.length > 0) {
+    const cleaned = specimen.imageUrls.map((u) => u.trim()).filter(Boolean);
+    if (cleaned.length > 0) return cleaned;
+  }
+  if (specimen.imageUrl && specimen.imageUrl.trim()) {
+    return [specimen.imageUrl.trim()];
+  }
+  return [];
+}
+
+export function normalizeArchiveImages(specimen: ArchiveSpecimen): ArchiveSpecimen {
+  const rawList =
+    specimen.imageUrls !== undefined
+      ? specimen.imageUrls
+      : specimen.imageUrl
+        ? [specimen.imageUrl]
+        : [];
+  const cleanUrls = rawList.map((u) => u.trim()).filter(Boolean);
+  return {
+    ...specimen,
+    imageUrls: cleanUrls,
+    imageUrl: cleanUrls[0] || '',
+  };
+}
+
 export function addArchiveSpecimen(
   archives: readonly ArchiveSpecimen[],
   specimen: Omit<ArchiveSpecimen, 'id'> & { id?: string }
 ): ArchiveSpecimen[] {
-  const created: ArchiveSpecimen = {
+  const created: ArchiveSpecimen = normalizeArchiveImages({
     ...specimen,
     title: specimen.title || specimen.nameKo,
     id: specimen.id || `archive-${Date.now()}`,
-  };
+  });
   const existingIdx = archives.findIndex((a) => a.id === created.id);
   if (existingIdx >= 0) {
     const next = [...archives];

@@ -39,6 +39,7 @@ export interface ArchiveSpecimen {
   extractionProtocol: string; // e.g. "3.5g / 150ml / 95°C / 20s → 15s → 25s → 40s"
   flavorComponents: string; // e.g. "구수한 숭늉·곡물 향 / 카페인 0.0% / 루틴·DNJ"
   imageUrl?: string;
+  imageUrls?: string[];
   harvestSeason?: string;
   specimenNotes?: string;
 }

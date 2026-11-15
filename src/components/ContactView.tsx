@@ -69,8 +69,8 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
 
           <dl className="mt-10 divide-y divide-[#141413] border-t border-b border-[#141413] text-xs">
             <div className="py-4">
-              <dt className="font-mono text-[11px] uppercase tracking-wider text-[#6E706E]">
-                OFFICIAL EMAIL
+              <dt className="font-mono text-[11px] tracking-wider text-[#6E706E]">
+                Email
               </dt>
               <dd className="mt-1 font-mono text-sm font-medium text-[#141413]">
                 <a href={`mailto:${contact.email}`} className="hover:underline">
@@ -80,15 +80,15 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
             </div>
 
             <div className="py-4">
-              <dt className="font-mono text-[11px] uppercase tracking-wider text-[#6E706E]">
-                ADDRESS & OPERATING HOURS
+              <dt className="font-mono text-[11px] tracking-wider text-[#6E706E]">
+                Address
               </dt>
               <dd className="mt-1 font-medium text-[#141413]">{contact.addressHours}</dd>
             </div>
 
             <div className="py-4">
-              <dt className="font-mono text-[11px] uppercase tracking-wider text-[#6E706E]">
-                SOCIAL ARCHIVE
+              <dt className="font-mono text-[11px] tracking-wider text-[#6E706E]">
+                Social
               </dt>
               <dd className="mt-1 font-mono text-[#141413]">{contact.socialHandle}</dd>
             </div>

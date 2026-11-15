@@ -14,6 +14,7 @@ import {
   INITIAL_HOME_SLIDES,
   moveItemDown,
   moveItemUp,
+  normalizeArchiveImages,
   removeBlock,
   removeHomeSlide,
   updateBlock,
@@ -131,11 +132,13 @@ export const AdminView: React.FC<AdminViewProps> = ({
         title: aboutTitle.trim() || dataset.about.title,
         blocks: aboutBlocks,
       },
-      archives: archivesDraft.map((a) => ({
-        ...a,
-        title: (a.title ?? a.nameKo).trim(),
-        nameKo: a.nameKo.trim() || (a.title ?? '').trim(),
-      })),
+      archives: archivesDraft.map((a) =>
+        normalizeArchiveImages({
+          ...a,
+          title: (a.title ?? a.nameKo).trim(),
+          nameKo: a.nameKo.trim() || (a.title ?? '').trim(),
+        })
+      ),
       journals: journalsDraft,
       contact: {
         title: contactTitle.trim(),
@@ -532,6 +535,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     extractionProtocol: '3.5g / 150ml / 95°C / 20s → 15s → 25s → 40s',
                     flavorComponents: '',
                     imageUrl: '',
+                    imageUrls: [],
                     specimenNotes: '',
                   },
                 ]);
@@ -548,6 +552,20 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 setArchivesDraft((prev) =>
                   prev.map((a, i) => (i === idx ? { ...a, ...patch } : a))
                 );
+              };
+
+              const imageList =
+                item.imageUrls !== undefined
+                  ? item.imageUrls
+                  : item.imageUrl
+                    ? [item.imageUrl]
+                    : [];
+
+              const setImageList = (nextList: string[]) => {
+                updateItem({
+                  imageUrls: nextList,
+                  imageUrl: nextList.find((u) => u.trim() !== '') || '',
+                });
               };
 
               return (
@@ -703,33 +721,167 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className="block text-[11px] text-[#6E706E]">
-                        Image URL
-                      </label>
-                      <input
-                        type="text"
-                        value={item.imageUrl || ''}
-                        onChange={(e) => updateItem({ imageUrl: e.target.value })}
-                        className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-xs"
-                      />
+                  <div className="space-y-3 border border-[#141413]/40 bg-[#F4F3EF]/60 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-[11px] font-medium text-[#6E706E]">
+                        Images ({imageList.length})
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setImageList([...imageList, ''])}
+                          className="border border-[#141413] bg-[#F4F3EF] px-2.5 py-1 text-[11px] font-medium text-[#141413] hover:bg-[#141413] hover:text-[#F4F3EF] cursor-pointer"
+                        >
+                          + Add Image
+                        </button>
+                        <label className="border border-[#141413] bg-[#F4F3EF] px-2.5 py-1 text-[11px] font-medium text-[#141413] hover:bg-[#141413] hover:text-[#F4F3EF] cursor-pointer">
+                          + Upload Files
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="sr-only"
+                            onChange={(e) => {
+                              const files = Array.from(e.target.files || []);
+                              if (files.length === 0) return;
+                              Promise.all(
+                                files.map(
+                                  (file) =>
+                                    new Promise<string>((resolve) => {
+                                      const reader = new FileReader();
+                                      reader.onload = () =>
+                                        resolve(
+                                          typeof reader.result === 'string'
+                                            ? reader.result
+                                            : ''
+                                        );
+                                      reader.onerror = () => resolve('');
+                                      reader.readAsDataURL(file);
+                                    })
+                                )
+                              ).then((results) => {
+                                const valid = results.filter(Boolean);
+                                if (valid.length > 0) {
+                                  setArchivesDraft((prev) =>
+                                    prev.map((a, i) => {
+                                      if (i !== idx) return a;
+                                      const cur =
+                                        a.imageUrls !== undefined
+                                          ? a.imageUrls
+                                          : a.imageUrl
+                                            ? [a.imageUrl]
+                                            : [];
+                                      const next = [
+                                        ...cur.filter((u) => u.trim() !== ''),
+                                        ...valid,
+                                      ];
+                                      return {
+                                        ...a,
+                                        imageUrls: next,
+                                        imageUrl: next[0] || '',
+                                      };
+                                    })
+                                  );
+                                }
+                              });
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-[11px] text-[#6E706E]">
-                        File Upload
-                      </label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          handleFileUploadToDataUrl(e.target.files?.[0], (dataUrl) =>
-                            updateItem({ imageUrl: dataUrl })
-                          )
-                        }
-                        className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-2 py-1.5 text-xs"
-                      />
-                    </div>
+
+                    {imageList.length === 0 ? (
+                      <div className="border border-dashed border-[#141413]/40 px-3 py-3 text-[11px] text-[#6E706E]">
+                        No images added yet. Click &quot;+ Add Image&quot; or &quot;+ Upload Files&quot; to add photos.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {imageList.map((imgUrl, imgIdx) => (
+                          <div
+                            key={`${item.id}-img-slot-${imgIdx}`}
+                            className="border border-[#141413] bg-[#F4F3EF] p-3 space-y-2"
+                          >
+                            <div className="flex items-center justify-between text-[11px]">
+                              <span className="font-medium text-[#141413]">
+                                Image {imgIdx + 1}
+                                {imgIdx === 0 ? ' (Cover)' : ''}
+                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setImageList(moveItemUp(imageList, imgIdx))
+                                  }
+                                  className="border border-[#141413] px-2 py-0.5 hover:bg-[#141413] hover:text-[#F4F3EF] cursor-pointer"
+                                >
+                                  ↑
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setImageList(moveItemDown(imageList, imgIdx))
+                                  }
+                                  className="border border-[#141413] px-2 py-0.5 hover:bg-[#141413] hover:text-[#F4F3EF] cursor-pointer"
+                                >
+                                  ↓
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setImageList(
+                                      imageList.filter((_, j) => j !== imgIdx)
+                                    )
+                                  }
+                                  className="border border-[#141413] px-2 py-0.5 hover:bg-[#141413] hover:text-[#F4F3EF] cursor-pointer"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                              <div>
+                                <label className="block text-[11px] text-[#6E706E]">
+                                  Image URL
+                                </label>
+                                <input
+                                  type="text"
+                                  value={imgUrl}
+                                  onChange={(e) => {
+                                    const next = [...imageList];
+                                    next[imgIdx] = e.target.value;
+                                    setImageList(next);
+                                  }}
+                                  placeholder="./images/..."
+                                  className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-xs"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[11px] text-[#6E706E]">
+                                  File Upload
+                                </label>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) =>
+                                    handleFileUploadToDataUrl(
+                                      e.target.files?.[0],
+                                      (dataUrl) => {
+                                        const next = [...imageList];
+                                        next[imgIdx] = dataUrl;
+                                        setImageList(next);
+                                      }
+                                    )
+                                  }
+                                  className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-2 py-1.5 text-xs"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1024,7 +1176,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
 
             <div>
               <label htmlFor="ce-addr" className="block text-xs text-[#6E706E]">
-                Address / Hours
+                Address
               </label>
               <input
                 id="ce-addr"

@@ -21,6 +21,8 @@ import {
   updateHomeSlide,
   removeHomeSlide,
   INITIAL_HOME_SLIDES,
+  getArchiveImageUrls,
+  normalizeArchiveImages,
 } from './cmsLogic';
 
 test('verifyAdminPasscode validates kyung passcode accurately', () => {
@@ -149,5 +151,20 @@ test('HomeSlide operations add, update, and remove 4:3 slides properly', () => {
 
   const removed = removeHomeSlide(updated, 'slide-99');
   assert.equal(removed.length, INITIAL_HOME_SLIDES.length);
+});
+
+test('getArchiveImageUrls and normalizeArchiveImages support single and multiple archive photos', () => {
+  const legacyOnly = INITIAL_DATASET.archives[0];
+  assert.deepEqual(getArchiveImageUrls(legacyOnly), [
+    './images/archive_morus_alba_1794702915918.jpg',
+  ]);
+
+  const multi = normalizeArchiveImages({
+    ...legacyOnly,
+    imageUrls: [' ./images/a.jpg ', '', './images/b.jpg'],
+  });
+  assert.deepEqual(multi.imageUrls, ['./images/a.jpg', './images/b.jpg']);
+  assert.equal(multi.imageUrl, './images/a.jpg');
+  assert.deepEqual(getArchiveImageUrls(multi), ['./images/a.jpg', './images/b.jpg']);
 });
 
