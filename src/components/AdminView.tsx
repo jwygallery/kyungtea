@@ -11,6 +11,7 @@ import {
 import {
   addBlock,
   addHomeSlide,
+  formatIsoToDisplayDate,
   INITIAL_HOME_SLIDES,
   moveItemDown,
   moveItemUp,
@@ -376,16 +377,6 @@ export const AdminView: React.FC<AdminViewProps> = ({
       {/* TAB: About */}
       {activeAdminTab === 'About' && (
         <div className="p-6 sm:p-10 space-y-6">
-          <div>
-            <label className="block text-xs text-[#6E706E]">Title</label>
-            <input
-              type="text"
-              value={aboutTitle}
-              onChange={(e) => setAboutTitle(e.target.value)}
-              className="mt-1.5 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-sm text-[#141413]"
-            />
-          </div>
-
           <div className="flex flex-wrap items-center gap-2 border-t border-b border-[#141413] py-3">
             <button
               type="button"
@@ -527,6 +518,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     id: `archive-${Date.now()}`,
                     archiveNo: `Archive No. ${nextNum}`,
                     title: '',
+                    subtitle: '',
+                    date: formatIsoToDisplayDate(new Date().toISOString()),
                     nameKo: '',
                     scientificName: '',
                     originCoords: '',
@@ -575,7 +568,7 @@ export const AdminView: React.FC<AdminViewProps> = ({
                 >
                   <div className="flex items-center justify-between border-b border-[#141413] pb-3 text-xs">
                     <span className="font-medium">
-                      {item.archiveNo || `Archive ${idx + 1}`}
+                      {item.title || item.nameKo || `Archive ${String(idx + 1).padStart(2, '0')}`}
                     </span>
                     <div className="flex items-center gap-1.5">
                       <button
@@ -604,20 +597,8 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className="block text-[11px] text-[#6E706E]">
-                        Archive No.
-                      </label>
-                      <input
-                        type="text"
-                        value={item.archiveNo}
-                        onChange={(e) => updateItem({ archiveNo: e.target.value })}
-                        placeholder="Archive No. 001"
-                        className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-xs"
-                      />
-                    </div>
-                    <div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-12">
+                    <div className="sm:col-span-5">
                       <label className="block text-[11px] text-[#6E706E]">
                         Title (제목)
                       </label>
@@ -626,6 +607,30 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         value={item.title ?? item.nameKo}
                         onChange={(e) => updateItem({ title: e.target.value })}
                         placeholder="상엽 뽕잎"
+                        className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-xs"
+                      />
+                    </div>
+                    <div className="sm:col-span-4">
+                      <label className="block text-[11px] text-[#6E706E]">
+                        Subtitle (부제목)
+                      </label>
+                      <input
+                        type="text"
+                        value={item.subtitle || ''}
+                        onChange={(e) => updateItem({ subtitle: e.target.value })}
+                        placeholder="산지 또는 한 줄 부제목"
+                        className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-xs"
+                      />
+                    </div>
+                    <div className="sm:col-span-3">
+                      <label className="block text-[11px] text-[#6E706E]">
+                        Date (작성날짜)
+                      </label>
+                      <input
+                        type="text"
+                        value={item.date || ''}
+                        onChange={(e) => updateItem({ date: e.target.value })}
+                        placeholder="Jun 12, 2026"
                         className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-xs"
                       />
                     </div>
@@ -916,8 +921,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
                     id: `journal-${Date.now()}`,
                     issueNo: `ISSUE ${nextNum}`,
                     title: '',
-                    date: '2026. 11',
+                    date: formatIsoToDisplayDate(new Date().toISOString()),
                     summary: '',
+                    coverImageUrl: '',
                     blocks: [],
                   },
                 ]);
@@ -973,9 +979,9 @@ export const AdminView: React.FC<AdminViewProps> = ({
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-12">
-                    <div className="sm:col-span-9">
+                    <div className="sm:col-span-5">
                       <label className="block text-[11px] text-[#6E706E]">
-                        Title
+                        Title (제목)
                       </label>
                       <input
                         type="text"
@@ -985,16 +991,58 @@ export const AdminView: React.FC<AdminViewProps> = ({
                         className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-sm"
                       />
                     </div>
+                    <div className="sm:col-span-4">
+                      <label className="block text-[11px] text-[#6E706E]">
+                        Subtitle (부제목)
+                      </label>
+                      <input
+                        type="text"
+                        value={post.summary || ''}
+                        onChange={(e) => updatePost({ summary: e.target.value })}
+                        placeholder="저널 부제목"
+                        className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-xs"
+                      />
+                    </div>
                     <div className="sm:col-span-3">
                       <label className="block text-[11px] text-[#6E706E]">
-                        Date
+                        Date (작성날짜)
                       </label>
                       <input
                         type="text"
                         value={post.date}
                         onChange={(e) => updatePost({ date: e.target.value })}
-                        placeholder="2026. 10"
+                        placeholder="Jun 12, 2026"
                         className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
+                    <div className="sm:col-span-8">
+                      <label className="block text-[11px] text-[#6E706E]">
+                        Cover Image URL (비워두면 본문 첫 번째 사진 사용)
+                      </label>
+                      <input
+                        type="text"
+                        value={post.coverImageUrl || ''}
+                        onChange={(e) => updatePost({ coverImageUrl: e.target.value })}
+                        placeholder="./images/..."
+                        className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-3 py-2 text-xs"
+                      />
+                    </div>
+                    <div className="sm:col-span-4">
+                      <label className="block text-[11px] text-[#6E706E]">
+                        Cover Upload
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          handleFileUploadToDataUrl(e.target.files?.[0], (dataUrl) => {
+                            updatePost({ coverImageUrl: dataUrl });
+                          })
+                        }
+                        className="mt-1 w-full border border-[#141413] bg-[#F4F3EF] px-2 py-1.5 text-xs"
                       />
                     </div>
                   </div>

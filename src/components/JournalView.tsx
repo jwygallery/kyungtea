@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { JournalPost } from '../types/cms';
+import { EditorialPostCard } from './EditorialPostCard';
 import { HerbariumImage } from './HerbariumImage';
 
 interface JournalViewProps {
@@ -53,13 +54,13 @@ export const JournalView: React.FC<JournalViewProps> = ({
   if (activePost) {
     return (
       <article className="mx-auto w-full max-w-3xl px-6 py-10 sm:py-14">
-        {/* Top-Left Back Button */}
+        {/* Top-Left Back Button with Section Indicator */}
         <div className="flex items-center justify-start pb-8">
           <button
             type="button"
             onClick={handleBackClick}
             aria-label="Back to journal list"
-            className="flex h-9 w-9 items-center justify-center text-[#141413] transition-opacity duration-150 hover:opacity-60 cursor-pointer"
+            className="inline-flex items-center gap-2.5 py-1 text-[#141413] transition-opacity duration-150 hover:opacity-60 cursor-pointer"
           >
             <svg
               width="20"
@@ -75,10 +76,11 @@ export const JournalView: React.FC<JournalViewProps> = ({
                 strokeWidth="1.5"
               />
             </svg>
+            <span className="text-sm font-medium tracking-tight">Journal</span>
           </button>
         </div>
 
-        {/* Article Header: Title and Date right below Title */}
+        {/* Article Header: Title, Subtitle, and Date */}
         <header className="border-b border-[#141413] pb-8">
           <h1
             className="text-2xl font-semibold leading-snug tracking-tight text-[#141413] sm:text-3xl"
@@ -86,6 +88,11 @@ export const JournalView: React.FC<JournalViewProps> = ({
           >
             {activePost.title}
           </h1>
+          {activePost.summary && (
+            <p className="mt-3 text-sm leading-relaxed text-[#6E706E] sm:text-base">
+              {activePost.summary}
+            </p>
+          )}
           <div className="mt-3 text-xs text-[#6E706E] tabular-nums">
             {activePost.date}
           </div>
@@ -144,45 +151,50 @@ export const JournalView: React.FC<JournalViewProps> = ({
   // Feed List View: Top Search Bar + Title and Date below Title
   return (
     <section className="mx-auto w-full max-w-[1440px]">
-      {/* Simple Top Search Bar */}
-      <div className="flex h-12 items-center justify-between gap-4 border-b border-[#141413] bg-[#F4F3EF] px-6 sm:px-10">
-        <div className="flex w-full max-w-xs items-center gap-2.5">
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            className="shrink-0 text-[#141413]"
-          >
-            <circle cx="6.8" cy="6.8" r="5.3" stroke="#141413" strokeWidth="1.4" />
-            <line x1="10.8" y1="10.8" x2="15" y2="15" stroke="#141413" strokeWidth="1.4" />
-          </svg>
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search"
-            aria-label="Search journal"
-            className="w-full bg-transparent text-xs text-[#141413] placeholder-[#6E706E] focus:outline-none"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery('')}
-              aria-label="Clear journal search"
-              className="shrink-0 text-xs leading-none text-[#6E706E] hover:text-[#141413] cursor-pointer"
+      {/* Top Page Title & Search Bar */}
+      <div className="flex flex-col gap-4 bg-[#F4F3EF] px-6 pt-6 pb-4 sm:flex-row sm:items-end sm:justify-between sm:px-10 sm:pt-10">
+        <h1 className="text-2xl font-semibold leading-snug tracking-tight text-[#141413] sm:text-3xl">
+          Journal
+        </h1>
+        <div className="flex items-center gap-3 sm:justify-end">
+          <div className="flex w-full items-center gap-2.5 border-b border-[#141413]/40 pb-1.5 transition-colors focus-within:border-[#141413] sm:w-64">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              className="shrink-0 text-[#141413]"
             >
-              ×
-            </button>
+              <circle cx="6.8" cy="6.8" r="5.3" stroke="#141413" strokeWidth="1.4" />
+              <line x1="10.8" y1="10.8" x2="15" y2="15" stroke="#141413" strokeWidth="1.4" />
+            </svg>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search"
+              aria-label="Search journal"
+              className="w-full bg-transparent text-xs text-[#141413] placeholder-[#6E706E] focus:outline-none"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label="Clear journal search"
+                className="shrink-0 text-xs leading-none text-[#6E706E] hover:text-[#141413] cursor-pointer"
+              >
+                ×
+              </button>
+            )}
+          </div>
+          {normalizedQuery && (
+            <span className="shrink-0 text-[11px] text-[#6E706E] tabular-nums">
+              {filteredJournals.length}
+            </span>
           )}
         </div>
-        {normalizedQuery && (
-          <span className="shrink-0 text-[11px] text-[#6E706E] tabular-nums">
-            {filteredJournals.length}
-          </span>
-        )}
       </div>
 
       {filteredJournals.length === 0 ? (
@@ -190,30 +202,27 @@ export const JournalView: React.FC<JournalViewProps> = ({
           {normalizedQuery ? '검색 결과가 없습니다.' : '등록된 저널 게시물이 없습니다.'}
         </div>
       ) : (
-        <div>
-          {filteredJournals.map((post) => (
-            <article
-              key={post.id}
-              onClick={() => handleSelectPost(post.id)}
-              role="button"
-              tabIndex={0}
-              aria-label={post.title}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleSelectPost(post.id);
-                }
-              }}
-              className="group border-b border-[#141413] bg-[#F4F3EF] px-6 py-8 transition-colors duration-150 hover:bg-[#EAE8E1]/60 sm:px-10 cursor-pointer"
-            >
-              <h2 className="text-xl font-semibold leading-snug tracking-tight text-[#141413] sm:text-2xl">
-                {post.title}
-              </h2>
-              <div className="mt-2.5 text-xs text-[#6E706E] tabular-nums">
-                {post.date}
-              </div>
-            </article>
-          ))}
+        <div className="grid grid-cols-1 gap-x-10 gap-y-12 px-6 pt-6 pb-12 sm:px-10 sm:pt-8 sm:pb-16 md:grid-cols-2 lg:gap-x-14 lg:gap-y-14">
+          {filteredJournals.map((post) => {
+            const coverImage =
+              post.coverImageUrl?.trim() ||
+              post.blocks.find((b) => b.type === 'image')?.content;
+            const subtitle =
+              post.summary?.trim() ||
+              post.blocks.find((b) => b.type === 'text')?.content.split('\n')[0] ||
+              '';
+
+            return (
+              <EditorialPostCard
+                key={post.id}
+                title={post.title}
+                subtitle={subtitle}
+                date={post.date}
+                imageUrl={coverImage}
+                onClick={() => handleSelectPost(post.id)}
+              />
+            );
+          })}
         </div>
       )}
     </section>

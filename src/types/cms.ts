@@ -31,6 +31,8 @@ export interface ArchiveSpecimen {
   id: string;
   archiveNo: string; // e.g. "Archive No. 001"
   title?: string; // Editable product/archive title in Admin
+  subtitle?: string; // Editorial subtitle shown in list & detail
+  date?: string; // Publication/archive date (e.g. "2026. 10. 15")
   nameKo: string; // e.g. "상엽 뽕잎"
   scientificName: string; // e.g. "Morus alba"
   originCoords: string; // e.g. "충북 영동 · 36°10'N 127°46'E"
@@ -50,6 +52,7 @@ export interface JournalPost {
   title: string;
   date: string; // e.g. "2026. 10"
   summary?: string;
+  coverImageUrl?: string;
   blocks: ContentBlock[];
 }
 

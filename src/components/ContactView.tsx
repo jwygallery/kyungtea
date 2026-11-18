@@ -90,7 +90,27 @@ export const ContactView: React.FC<ContactViewProps> = ({ contact }) => {
               <dt className="text-[11px] font-medium tracking-wide text-[#6E706E]">
                 Social
               </dt>
-              <dd className="mt-1 text-sm font-medium text-[#141413]">{contact.socialHandle}</dd>
+              <dd className="mt-1 text-sm font-medium text-[#141413]">
+                {contact.socialHandle.startsWith('http') ? (
+                  <a
+                    href={contact.socialHandle}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {contact.socialHandle}
+                  </a>
+                ) : (
+                  <a
+                    href={`https://instagram.com/${contact.socialHandle.replace(/^@/, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {contact.socialHandle}
+                  </a>
+                )}
+              </dd>
             </div>
           </dl>
         </div>

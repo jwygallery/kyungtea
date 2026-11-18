@@ -3,7 +3,7 @@ import { ArchiveSpecimen, JournalPost, MenuTab } from '../types/cms';
 
 interface HeaderAndDrawerProps {
   activeTab: MenuTab;
-  onSelectTab: (tab: MenuTab) => void;
+  onSelectTab: (tab: MenuTab, preserveSearch?: boolean) => void;
   isDrawerOpen: boolean;
   setIsDrawerOpen: (open: boolean) => void;
   archives?: ArchiveSpecimen[];
@@ -112,13 +112,13 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
     e.preventDefault();
     if (!normalizedQuery) return;
     if (matchedArchives.length > 0) {
-      onSelectTab('Archive');
+      onSelectTab('Archive', true);
       setIsDrawerOpen(false);
     } else if (matchedJournals.length > 0) {
-      onSelectTab('Journal');
+      onSelectTab('Journal', true);
       setIsDrawerOpen(false);
     } else {
-      onSelectTab('Archive');
+      onSelectTab('Archive', true);
       setIsDrawerOpen(false);
     }
   };

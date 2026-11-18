@@ -14,6 +14,7 @@ import { HomeView } from './components/HomeView';
 import { JournalView } from './components/JournalView';
 import { KyungDataset, MenuTab } from './types/cms';
 import {
+  formatIsoToDisplayDate,
   INITIAL_DATASET,
   INITIAL_HOME_SLIDES,
   resolveDatasetPriority,
@@ -108,7 +109,10 @@ export default function App() {
   const [bootCycle, setBootCycle] = useState<number>(0);
 
   // Navigate to a route and push an entry to browser history so Back returns to the previous page
-  const navigateTo = (tab: MenuTab, itemId: string | null = null) => {
+  const navigateTo = (tab: MenuTab, itemId: string | null = null, preserveSearch = false) => {
+    if (!preserveSearch) {
+      setSearchQuery('');
+    }
     setActiveTab(tab);
     setActiveItemId(itemId);
     if (typeof window !== 'undefined') {
@@ -143,7 +147,12 @@ export default function App() {
 
     const syncRouteFromLocation = () => {
       const parsed = parseRouteFromHash(window.location.hash);
-      setActiveTab(parsed.tab);
+      setActiveTab((prevTab) => {
+        if (prevTab !== parsed.tab) {
+          setSearchQuery('');
+        }
+        return parsed.tab;
+      });
       setActiveItemId(parsed.itemId);
       setIsDrawerOpen(false);
       window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
@@ -252,7 +261,7 @@ export default function App() {
     >
       <HeaderAndDrawer
         activeTab={activeTab}
-        onSelectTab={(tab) => navigateTo(tab, null)}
+        onSelectTab={(tab, preserveSearch) => navigateTo(tab, null, preserveSearch)}
         isDrawerOpen={isDrawerOpen}
         setIsDrawerOpen={setIsDrawerOpen}
         archives={dataset.archives}
@@ -268,11 +277,12 @@ export default function App() {
           <ArchiveView
             archives={dataset.archives}
             selectedSpecimenId={activeItemId}
-            onSelectSpecimenId={(id) => navigateTo('Archive', id)}
+            onSelectSpecimenId={(id) => navigateTo('Archive', id, true)}
             onBack={() => handleBackNavigation('Archive')}
             onNavigateTab={(tab) => navigateTo(tab, null)}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            fallbackDate={formatIsoToDisplayDate(dataset.updatedAt)}
           />
         )}
         {activeTab === 'About' && <AboutView about={dataset.about} />}
@@ -280,7 +290,7 @@ export default function App() {
           <JournalView
             journals={dataset.journals}
             selectedPostId={activeItemId}
-            onSelectPostId={(id) => navigateTo('Journal', id)}
+            onSelectPostId={(id) => navigateTo('Journal', id, true)}
             onBack={() => handleBackNavigation('Journal')}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}

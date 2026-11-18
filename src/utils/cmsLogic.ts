@@ -68,6 +68,8 @@ export const INITIAL_DATASET: KyungDataset = {
       id: 'archive-001',
       archiveNo: 'Archive No. 001',
       title: '상엽 뽕잎',
+      subtitle: '소백산맥 자락 충북 영동 해발 480m 산뽕나무 잎 표본',
+      date: 'Oct 15, 2026',
       nameKo: '상엽 뽕잎',
       scientificName: 'Morus alba',
       originCoords: '충북 영동 · 36°10\'N 127°46\'E',
@@ -86,7 +88,7 @@ export const INITIAL_DATASET: KyungDataset = {
       id: 'journal-001',
       issueNo: 'ISSUE 01',
       title: '충북 영동 480M, 첫 서리가 내리기 전의 상엽(桑葉)과 220°C 살청의 기록',
-      date: '2026. 10',
+      date: 'Oct 1, 2026',
       summary:
         '북위 36도 10분, 동경 127도 46분. 안개가 걷히지 않은 영동의 산비탈에서 채집한 뽕잎이 12mm의 균일한 표본으로 제다되기까지의 현장 노트.',
       blocks: [
@@ -363,3 +365,38 @@ export function resolveDatasetPriority(
 
   return remoteTime >= localTime ? remoteData : localData;
 }
+
+const EN_MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+export function formatIsoToDisplayDate(isoString?: string): string {
+  if (!isoString) return '';
+  const match = isoString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    const year = match[1];
+    const monthIdx = parseInt(match[2], 10) - 1;
+    const day = parseInt(match[3], 10);
+    const monthName = EN_MONTHS[monthIdx];
+    if (monthName && !Number.isNaN(day)) {
+      return `${monthName} ${day}, ${year}`;
+    }
+  }
+  const parsed = Date.parse(isoString);
+  if (Number.isNaN(parsed)) return '';
+  const d = new Date(parsed);
+  return `${EN_MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
+
+

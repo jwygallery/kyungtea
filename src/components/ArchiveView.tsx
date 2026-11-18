@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArchiveSpecimen, MenuTab } from '../types/cms';
 import { getArchiveImageUrls } from '../utils/cmsLogic';
+import { EditorialPostCard } from './EditorialPostCard';
 import { HerbariumImage } from './HerbariumImage';
 
 interface ArchiveViewProps {
@@ -11,6 +12,7 @@ interface ArchiveViewProps {
   onBack?: () => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
+  fallbackDate?: string;
 }
 
 export const ArchiveView: React.FC<ArchiveViewProps> = ({
@@ -21,6 +23,7 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
   onBack,
   searchQuery: externalQuery,
   onSearchChange,
+  fallbackDate,
 }) => {
   const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
   const [internalQuery, setInternalQuery] = useState<string>('');
@@ -57,9 +60,20 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
     }
   };
 
+  const getSubtitle = (item: ArchiveSpecimen) =>
+    item.subtitle?.trim() ||
+    item.harvestSeason?.trim() ||
+    (item.originCoords
+      ? `${item.originCoords}${item.scientificName ? ` · ${item.scientificName}` : ''}`
+      : '');
+
+  const getDate = (item: ArchiveSpecimen) => item.date?.trim() || fallbackDate || '';
+
   // Product Detail View when an Archive item is clicked
   if (selectedSpecimen) {
     const displayTitle = selectedSpecimen.title || selectedSpecimen.nameKo;
+    const displaySubtitle = getSubtitle(selectedSpecimen);
+    const displayDate = getDate(selectedSpecimen);
     const specimenImages = getArchiveImageUrls(selectedSpecimen);
     const safeIdx =
       activeImageIdx >= 0 && activeImageIdx < specimenImages.length ? activeImageIdx : 0;
@@ -67,13 +81,13 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
 
     return (
       <article className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
-        {/* Top-Left Back Button */}
+        {/* Top-Left Back Button with Section Indicator */}
         <div className="flex items-center justify-start pb-8">
           <button
             type="button"
             onClick={handleBackClick}
             aria-label="Back to archive list"
-            className="flex h-9 w-9 items-center justify-center text-[#141413] transition-opacity duration-150 hover:opacity-60 cursor-pointer"
+            className="inline-flex items-center gap-2.5 py-1 text-[#141413] transition-opacity duration-150 hover:opacity-60 cursor-pointer"
           >
             <svg
               width="20"
@@ -89,6 +103,7 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
                 strokeWidth="1.5"
               />
             </svg>
+            <span className="text-sm font-medium tracking-tight">Archive</span>
           </button>
         </div>
 
@@ -105,7 +120,6 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
                     : displayTitle
                 }
                 aspectClass="aspect-[3/4]"
-                specimenCode={selectedSpecimen.archiveNo}
               />
 
               {specimenImages.length > 1 && (
@@ -142,12 +156,19 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
           {/* Right: Product Info & Specifications */}
           <div className="md:col-span-8">
             <header className="border-b border-[#141413] pb-6">
-              <div className="text-xs font-normal tracking-wide text-[#6E706E] tabular-nums">
-                {selectedSpecimen.archiveNo}
-              </div>
-              <h1 className="mt-1.5 text-2xl font-semibold leading-snug tracking-tight text-[#141413] sm:text-3xl">
+              <h1 className="text-2xl font-semibold leading-snug tracking-tight text-[#141413] sm:text-3xl">
                 {displayTitle}
               </h1>
+              {displaySubtitle && (
+                <p className="mt-2.5 text-sm leading-relaxed text-[#6E706E] sm:text-base">
+                  {displaySubtitle}
+                </p>
+              )}
+              {displayDate && (
+                <div className="mt-3 text-xs text-[#6E706E] tabular-nums">
+                  {displayDate}
+                </div>
+              )}
             </header>
 
             {selectedSpecimen.specimenNotes && (
@@ -214,8 +235,9 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
   const filteredArchives = normalizedQuery
     ? archives.filter((item) => {
         const hay = [
-          item.archiveNo,
           item.title,
+          item.subtitle,
+          item.date,
           item.nameKo,
           item.scientificName,
           item.originCoords,
@@ -231,48 +253,53 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
       })
     : archives;
 
-  // Archive Product List Grid: Top Search Bar + Left 2 lines + Right 60% smaller vertical 3:4 photo
+  // Unified Editorial Grid: 2 columns, no dividing lines, Photo Left + Title/Subtitle/Date Right
   return (
     <section className="mx-auto w-full max-w-[1440px]">
-      {/* Simple Top Search Bar */}
-      <div className="flex h-12 items-center justify-between gap-4 border-b border-[#141413] bg-[#F4F3EF] px-6 sm:px-10">
-        <div className="flex w-full max-w-xs items-center gap-2.5">
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            className="shrink-0 text-[#141413]"
-          >
-            <circle cx="6.8" cy="6.8" r="5.3" stroke="#141413" strokeWidth="1.4" />
-            <line x1="10.8" y1="10.8" x2="15" y2="15" stroke="#141413" strokeWidth="1.4" />
-          </svg>
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search"
-            aria-label="Search archive"
-            className="w-full bg-transparent text-xs text-[#141413] placeholder-[#6E706E] focus:outline-none"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery('')}
-              aria-label="Clear archive search"
-              className="shrink-0 text-xs leading-none text-[#6E706E] hover:text-[#141413] cursor-pointer"
+      {/* Top Page Title & Search Bar */}
+      <div className="flex flex-col gap-4 bg-[#F4F3EF] px-6 pt-6 pb-4 sm:flex-row sm:items-end sm:justify-between sm:px-10 sm:pt-10">
+        <h1 className="text-2xl font-semibold leading-snug tracking-tight text-[#141413] sm:text-3xl">
+          Archive
+        </h1>
+        <div className="flex items-center gap-3 sm:justify-end">
+          <div className="flex w-full items-center gap-2.5 border-b border-[#141413]/40 pb-1.5 transition-colors focus-within:border-[#141413] sm:w-64">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              className="shrink-0 text-[#141413]"
             >
-              ×
-            </button>
+              <circle cx="6.8" cy="6.8" r="5.3" stroke="#141413" strokeWidth="1.4" />
+              <line x1="10.8" y1="10.8" x2="15" y2="15" stroke="#141413" strokeWidth="1.4" />
+            </svg>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search"
+              aria-label="Search archive"
+              className="w-full bg-transparent text-xs text-[#141413] placeholder-[#6E706E] focus:outline-none"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label="Clear archive search"
+                className="shrink-0 text-xs leading-none text-[#6E706E] hover:text-[#141413] cursor-pointer"
+              >
+                ×
+              </button>
+            )}
+          </div>
+          {normalizedQuery && (
+            <span className="shrink-0 text-[11px] text-[#6E706E] tabular-nums">
+              {filteredArchives.length}
+            </span>
           )}
         </div>
-        {normalizedQuery && (
-          <span className="shrink-0 text-[11px] text-[#6E706E] tabular-nums">
-            {filteredArchives.length}
-          </span>
-        )}
       </div>
 
       {filteredArchives.length === 0 ? (
@@ -280,56 +307,20 @@ export const ArchiveView: React.FC<ArchiveViewProps> = ({
           {normalizedQuery ? '검색 결과가 없습니다.' : '등록된 원물 아카이브가 없습니다.'}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          {filteredArchives.map((item, idx) => {
-            const isRightCol = idx % 2 === 1;
+        <div className="grid grid-cols-1 gap-x-10 gap-y-12 px-6 pt-6 pb-12 sm:px-10 sm:pt-8 sm:pb-16 md:grid-cols-2 lg:gap-x-14 lg:gap-y-14">
+          {filteredArchives.map((item) => {
             const displayTitle = item.title || item.nameKo;
-
             return (
-              <article
+              <EditorialPostCard
                 key={item.id}
+                title={displayTitle}
+                subtitle={getSubtitle(item)}
+                date={getDate(item)}
+                imageUrl={getArchiveImageUrls(item)[0]}
                 onClick={() => handleSelectSpecimen(item)}
-                role="button"
-                tabIndex={0}
-                aria-label={`${item.archiveNo} ${displayTitle}`}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleSelectSpecimen(item);
-                  }
-                }}
-                className={`group flex items-center justify-between gap-6 border-b border-[#141413] bg-[#F4F3EF] px-6 py-6 transition-colors duration-150 hover:bg-[#EAE8E1]/60 sm:px-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-[#141413] ${
-                  !isRightCol ? 'md:border-r md:border-[#141413]' : ''
-                }`}
-              >
-                {/* Left: 2 lines — Line 1: Archive No. 001 (small, not bold), Line 2: Single Title */}
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-normal tracking-wide text-[#6E706E] tabular-nums">
-                    {item.archiveNo}
-                  </div>
-                  <h2 className="mt-1.5 text-lg font-medium tracking-tight text-[#141413] sm:text-xl">
-                    {displayTitle}
-                  </h2>
-                </div>
-
-                {/* Right: 60% Smaller Vertical 3:4 (세로 4:3) Product Photo */}
-                <div className="w-14 shrink-0 sm:w-[76px]">
-                  <HerbariumImage
-                    src={getArchiveImageUrls(item)[0]}
-                    alt={displayTitle}
-                    aspectClass="aspect-[3/4]"
-                    specimenCode={item.archiveNo}
-                  />
-                </div>
-              </article>
+              />
             );
           })}
-          {filteredArchives.length % 2 === 1 && (
-            <div
-              aria-hidden="true"
-              className="hidden border-b border-[#141413] bg-[#F4F3EF] md:block"
-            />
-          )}
         </div>
       )}
     </section>
