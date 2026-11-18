@@ -32,6 +32,8 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
   onNavigateItem,
 }) => {
   const [internalQuery, setInternalQuery] = useState<string>('');
+  const [shouldRenderDrawer, setShouldRenderDrawer] = useState<boolean>(isDrawerOpen);
+  const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(isDrawerOpen);
   const query = externalQuery !== undefined ? externalQuery : internalQuery;
 
   const setQuery = (val: string) => {
@@ -41,6 +43,27 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
       setInternalQuery(val);
     }
   };
+
+  useEffect(() => {
+    if (isDrawerOpen) {
+      setShouldRenderDrawer(true);
+      let raf2 = 0;
+      const raf1 = window.requestAnimationFrame(() => {
+        raf2 = window.requestAnimationFrame(() => {
+          setIsDrawerVisible(true);
+        });
+      });
+      return () => {
+        window.cancelAnimationFrame(raf1);
+        window.cancelAnimationFrame(raf2);
+      };
+    }
+    setIsDrawerVisible(false);
+    const timer = window.setTimeout(() => {
+      setShouldRenderDrawer(false);
+    }, 320);
+    return () => window.clearTimeout(timer);
+  }, [isDrawerOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -102,35 +125,11 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
 
   return (
     <>
-      {/* Top Header: 1px solid #141413 bottom border, 3 lines menu button on left, lowercase kyung in center */}
+      {/* Top Header: 1px solid #141413 bottom border, kyung tea house logo on left, 3 lines menu button on right */}
       <header className="sticky top-0 z-30 h-14 w-full border-b border-[#141413] bg-[#F4F3EF]">
-        <div className="mx-auto grid h-full max-w-[1440px] grid-cols-3 items-center px-4 sm:px-8">
-          {/* Left Zone: 3 horizontal lines only */}
+        <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-4 sm:px-8">
+          {/* Left Zone: kyung tea house main logo */}
           <div className="flex items-center justify-start">
-            <button
-              type="button"
-              onClick={() => setIsDrawerOpen(true)}
-              aria-label="Open navigation menu"
-              aria-expanded={isDrawerOpen}
-              className="flex h-9 w-9 items-center justify-center text-[#141413] transition-opacity duration-150 hover:opacity-60 focus-visible:outline-1 focus-visible:outline-[#141413] cursor-pointer"
-            >
-              <svg
-                width="20"
-                height="14"
-                viewBox="0 0 20 14"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <line x1="0" y1="1" x2="20" y2="1" stroke="#141413" strokeWidth="1.5" />
-                <line x1="0" y1="7" x2="20" y2="7" stroke="#141413" strokeWidth="1.5" />
-                <line x1="0" y1="13" x2="20" y2="13" stroke="#141413" strokeWidth="1.5" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Center Zone: kyung tea house main logo */}
-          <div className="flex items-center justify-center">
             <button
               type="button"
               onClick={() => onSelectTab('Home')}
@@ -179,32 +178,57 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
             </button>
           </div>
 
-          {/* Right Zone: Empty */}
-          <div />
+          {/* Right Zone: 3 horizontal lines menu button */}
+          <div className="flex items-center justify-end">
+            <button
+              type="button"
+              onClick={() => setIsDrawerOpen(true)}
+              aria-label="Open navigation menu"
+              aria-expanded={isDrawerOpen}
+              className="flex h-9 w-9 items-center justify-center text-[#141413] transition-opacity duration-150 hover:opacity-60 focus-visible:outline-1 focus-visible:outline-[#141413] cursor-pointer"
+            >
+              <svg
+                width="20"
+                height="14"
+                viewBox="0 0 20 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <line x1="0" y1="1" x2="20" y2="1" stroke="#141413" strokeWidth="1.5" />
+                <line x1="0" y1="7" x2="20" y2="7" stroke="#141413" strokeWidth="1.5" />
+                <line x1="0" y1="13" x2="20" y2="13" stroke="#141413" strokeWidth="1.5" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Left Overlay Menu Drawer */}
-      {isDrawerOpen && (
+      {/* Right Overlay Menu Drawer */}
+      {shouldRenderDrawer && (
         <div
-          className="fixed inset-0 z-50 flex"
+          className="fixed inset-0 z-50 flex justify-end"
           role="dialog"
           aria-modal="true"
           aria-label="Site Navigation Drawer"
         >
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-[#141413]/40 transition-opacity"
+            className={`fixed inset-0 bg-[#141413]/40 transition-opacity duration-300 ease-out ${
+              isDrawerVisible ? 'opacity-100' : 'opacity-0'
+            }`}
             onClick={() => setIsDrawerOpen(false)}
           />
 
-          {/* Left Slide Drawer Panel */}
+          {/* Right Slide Drawer Panel */}
           <nav
             aria-label="Primary Navigation"
-            className="relative z-10 flex h-full w-full max-w-sm flex-col justify-between border-r border-[#141413] bg-[#F4F3EF]"
+            className={`relative z-10 flex h-full w-[70%] max-w-sm flex-col justify-between border-l border-[#141413] bg-[#F4F3EF] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              isDrawerVisible ? 'translate-x-0' : 'translate-x-full'
+            }`}
           >
             {/* Drawer Header: Simple Search Bar on Left of X, above About */}
-            <div className="flex h-14 items-center justify-between gap-3 border-b border-[#141413] px-6">
+            <div className="flex h-14 items-center justify-between gap-3 border-b border-[#141413] px-5 sm:px-6">
               <form
                 onSubmit={handleDrawerSearchSubmit}
                 className="flex flex-1 items-center gap-2.5 border-b border-[#141413]/40 py-1 focus-within:border-[#141413]"
@@ -318,7 +342,7 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
                 </div>
               )}
 
-              <div className="divide-y divide-[#141413] border-b border-[#141413]">
+              <div className="py-2">
                 {MENU_ITEMS.map(({ tab }) => {
                   const isActive = activeTab === tab;
 
@@ -330,7 +354,7 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
                         onSelectTab(tab);
                         setIsDrawerOpen(false);
                       }}
-                      className={`group flex w-full items-center px-6 py-5 text-left transition-colors duration-150 cursor-pointer ${
+                      className={`group flex w-full items-center px-5 py-4 text-left transition-colors duration-150 sm:px-6 cursor-pointer ${
                         isActive
                           ? 'bg-[#141413] text-[#F4F3EF]'
                           : 'bg-[#F4F3EF] text-[#141413] hover:bg-[#EAE8E1]'
@@ -344,7 +368,7 @@ export const HeaderAndDrawer: React.FC<HeaderAndDrawerProps> = ({
             </div>
 
             {/* Drawer Bottom Banner: kyung logo on left, inconspicuous unbolded admin button on right */}
-            <div className="flex h-14 items-center justify-between px-6">
+            <div className="flex h-14 items-center justify-between px-5 sm:px-6">
               <button
                 type="button"
                 onClick={() => {
